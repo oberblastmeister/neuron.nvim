@@ -19,6 +19,14 @@ local function on_exit_factory(name)
   end)
 end
 
+local function feedkeys(string, mode)
+  api.nvim_feedkeys(api.nvim_replace_termcodes(string, true, true, true), mode, true)
+end
+
+local function neuron_dir()
+  return vim.g.neuron_directory or "~/neuron"
+end
+
 function M.rib(opts)
   assert(not NeuronJob, "you already started a neuron server")
 
@@ -60,6 +68,24 @@ function M.open(opts)
     cwd = vim.g.neuron_directory or "~/neuron",
     on_stderr = on_stderr_factory("neuron open"),
     on_exit = on_exit_factory("neuron open"),
+  }:start()
+end
+
+function M.new(opts)
+  opts = opts or {}
+
+  Job:new {
+    command = "neuron",
+    args = {"new"},
+    cwd = neuron_dir(),
+    on_stderr = on_stderr_factory("neuron new"),
+    on_stdout = vim.schedule_wrap(function(error, data)
+      assert(not error, error)
+
+      vim.cmd("edit " .. data)
+      feedkeys("Go<CR>#<space>", 'n')
+    end),
+    on_exit = on_exit_factory("neuron new"),
   }:start()
 end
 
