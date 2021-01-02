@@ -252,7 +252,7 @@ do
 
               -- done
               lock = false
-            end, 100)
+            end, 50)
 
             lock = true -- lock it for better perf
           end
