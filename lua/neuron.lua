@@ -7,8 +7,11 @@ local previewers = require('telescope.previewers')
 local conf = require('telescope.config').values
 local actions = require('telescope.actions')
 local utils = require("neuron/utils")
+local cmd = require("neuron/cmd")
 
 local M = {}
+
+local ns
 
 function M.rib(opts)
   assert(not NeuronJob, "you already started a neuron server")
@@ -144,8 +147,6 @@ function M.find_links(opts)
     table.insert(args, "--cached")
   end
 
-  dump(args)
-
   Job:new {
     command = "neuron",
     -- args = {"query", "--backlinks-of", opts.id or M.get_current_id(), "--cached"},
@@ -166,17 +167,30 @@ end
 function M.enter_link()
   local word = vim.fn.expand("<cWORD>")
 
-  local left_id = string.match(word, '%[%[(.*)%]%]') -- if it is [[id]]
-  local right_id = string.match(left_id or '', '%[(.*)%]') -- check if there is one more layer of [], if it is [[[id]]]
-  local id = right_id or left_id
+  local id = utils.match_link(word)
 
   if id == nil then
     error("There is no link under the cursor")
   end
 
-  utils.path_from_id(id, M.config.neuron_dir, function(path)
-    vim.cmd("edit " .. path)
+  cmd.query_id(id, M.config.neuron_dir, function(json)
+    vim.cmd("edit " .. json.result.zettelPath)
   end)
+end
+
+function M.add_virtual_titles(buf)
+  for ln, line in ipairs(api.nvim_buf_get_lines(buf, 0, -1, true)) do
+    if line ~= nil or line ~= "" then
+      local id = utils.match_link(line) 
+      if id then
+        cmd.query_id(id, M.config.neuron_dir, function(json)
+          local title = json.result.zettelTitle
+          -- lua is one indexed
+          api.nvim_buf_set_virtual_text(buf, ns, ln - 1, {{title, "TabLineFill"}}, {})
+        end)
+      end
+    end
+  end
 end
 
 do
@@ -187,6 +201,7 @@ do
   function M.setup(user_config)
     user_config = user_config or {}
     M.config = vim.tbl_extend("keep", user_config, default_config)
+    ns = api.nvim_create_namespace("neuron.nvim")
   end
 end
 
