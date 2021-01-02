@@ -98,7 +98,7 @@ local function _find_zettels(opts)
   local entry_maker = gen_from_zettels
 
   pickers.new(opts, {
-    prompt_title = 'Find Zettels',
+    prompt_title = opts.title or 'Find Zettels',
     finder = finders.new_table {
       results = json,
       entry_maker = opts.entry_maker or entry_maker,
@@ -129,7 +129,7 @@ function M.find_zettels(opts)
   }:start()
 end
 
-function M.find_links(opts)
+function M.find_backlinks(opts)
   opts = opts or {}
 
   local args = {"query"}
@@ -157,6 +157,7 @@ function M.find_links(opts)
       assert(not error, error)
 
       _find_zettels {
+        title = 'Find Backlinks',
         json = data,
         entry_maker = gen_from_links
       }
@@ -206,8 +207,6 @@ function M.add_virtual_title_current_line(buf, ln, line)
             virt_text = {{title, "TabLineFill"}},
           })
       end)
-    else
-      api.nvim_buf_clear_namespace(buf, ns, ln - 1, ln)
     end
   end
 end
