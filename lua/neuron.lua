@@ -178,7 +178,7 @@ function M.enter_link()
   end)
 end
 
-function M.add_virtual_titles(buf)
+function M.add_all_virtual_titles(buf)
   for ln, line in ipairs(api.nvim_buf_get_lines(buf, 0, -1, true)) do
     if line ~= nil or line ~= "" then
       local start_col, end_col = utils.match_link_idx(line)
@@ -208,7 +208,7 @@ end
 
 function M.update_virtual_titles(buf)
   api.nvim_buf_clear_namespace(buf, ns, 0, -1)
-  M.add_virtual_titles()
+  M.add_all_virtual_titles()
 end
 
 do
