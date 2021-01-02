@@ -240,21 +240,92 @@ do
     end
   end
 
-  local lock = false
+  List = {}
+  function List.new (max)
+    return {first = 0, last = -1, max = max}
+  end
+
+  function List.pushleft (list, value)
+    if List.len_too_large(list) then
+      return true
+    end
+
+    local first = list.first - 1
+    list.first = first
+    list[first] = value
+
+    return false
+  end
+
+  function List.pushright (list, value)
+    if List.len_too_large(list) then
+      return true
+    end
+
+    local last = list.last + 1
+    list.last = last
+    list[last] = value
+
+    return false
+  end
+
+  function List.len_too_large(list)
+    if list.max then
+      if List.len(list) > list.max then
+        return true
+      end
+    end
+
+    return false
+  end
+
+  function List.popleft (list)
+    local first = list.first
+    if first > list.last then return nil end
+    local value = list[first]
+    list[first] = nil        -- to allow garbage collection
+    list.first = first + 1
+    return value
+  end
+
+  function List.is_empty(list)
+    return list.first > list.last
+  end
+
+  function List.popright (list)
+    local last = list.last
+    if list.first > last then return nil end
+    local value = list[last]
+    list[last] = nil         -- to allow garbage collection
+    list.last = last - 1
+    return value
+  end
+
+  function List.len(list)
+    return list.last - list.first
+  end
+
+  local queue = List.new(1)
 
   function M.attach_buffer_fast()
     api.nvim_buf_attach(0, true, {
         on_lines = vim.schedule_wrap(function(...)
-          if lock == false then
-            local params = {...}
+          local params = {...}
+          local full = List.pushleft(queue, params)
+          if full then
+            List.popright(queue)
+            List.pushleft(queue, params)
+          end
+
+          if not full then
             vim.defer_fn(function()
-              on_lines(params)
+              local popped = List.popright(queue)
+              if popped == nil then
+                return
+              end
 
-              -- done
-              lock = false
-            end, 50)
-
-            lock = true -- lock it for better perf
+              on_lines(popped)
+            end, 100)
           end
         end)
       })
