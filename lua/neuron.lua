@@ -185,6 +185,10 @@ function M.add_virtual_titles(buf)
       local id = utils.match_link(line)
       if id ~= nil then
         cmd.query_id(id, M.config.neuron_dir, function(json)
+          if not json then
+            return
+          end
+
           if json.error then
             return
           end

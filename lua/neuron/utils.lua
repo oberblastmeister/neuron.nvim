@@ -40,20 +40,17 @@ function M.feedkeys(string, mode)
 end
 
 function M.match_link(s)
-  local folgezettel = string.match(s, '%[%[%[(.+)%]%]%]') -- if it is [[id]]
+  local maybe_folgezettel = string.match(s, '%[%[%[(%w%w%w%w%w%w%w%w)%]%]%]') -- kinda dumb lua regex, matches 8 alphanum
 
-  if folgezettel == nil then
-    folgezettel =  string.match(s, '%[%[(.+)%]%]')
+  if maybe_folgezettel == nil then
+    maybe_folgezettel =  string.match(s, '%[%[(%w%w%w%w%w%w%w%w)%]%]')
   end
 
-  return folgezettel
-
-  -- local right_id = s.match(left_id or '', '%[(.*)%]') -- check if there is one more layer of [], if it is [[[id]]]
-  -- return right_id or left_id
+  return maybe_folgezettel
 end
 
 function M.match_link_idx(string)
-  local i, j = string.find(string, '%[%[(.+)%]%]')
+  local i, j = string.find(string, '%[%[(%w%w%w%w%w%w%w%w)%]%]')
   return i, j
 end
 
