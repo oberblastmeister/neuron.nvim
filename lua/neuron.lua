@@ -241,20 +241,42 @@ do
   end
 
   List = {}
-  function List.new ()
-    return {first = 0, last = -1}
+  function List.new (max)
+    return {first = 0, last = -1, max = max}
   end
 
   function List.pushleft (list, value)
+    if List.len_too_large(list) then
+      return false
+    end
+
     local first = list.first - 1
     list.first = first
     list[first] = value
+
+    return true
   end
 
   function List.pushright (list, value)
+    if List.len_too_large(list) then
+      return false
+    end
+
     local last = list.last + 1
     list.last = last
     list[last] = value
+
+    return true
+  end
+
+  function List.len_too_large(list)
+    if list.max then
+      if List.len(list) > list.max then
+        return true
+      end
+    end
+
+    return false
   end
 
   function List.popleft (list)
@@ -283,29 +305,21 @@ do
     return list.last - list.first
   end
 
-  local queue = List.new()
-  local MAX_QUEUED = 2
+  local queue = List.new(1)
 
   function M.attach_buffer_fast()
     api.nvim_buf_attach(0, true, {
         on_lines = vim.schedule_wrap(function(...)
-          if List.len(queue) > MAX_QUEUED then
-            List.popright(queue)
+          if List.pushleft(queue, {...}) then
+            vim.defer_fn(function()
+              local popped = List.popright(queue)
+              if popped == nil then
+                return
+              end
+
+              on_lines(popped)
+            end, 100)
           end
-
-          List.pushleft(queue, {...})
-
-          -- print(string.format("first: %s, last: %s", queue.first, queue.last))
-
-          vim.defer_fn(function()
-
-            local popped = List.popright(queue)
-            if popped == nil then
-              return
-            end
-
-            on_lines(popped)
-          end, 100)
         end)
       })
   end
