@@ -1,35 +1,14 @@
 local Job = require("plenary/job")
 local uv = vim.loop
-local lunajson = require("lunajson")
 local pickers = require('telescope.pickers')
 local api = vim.api
 local finders = require('telescope.finders')
 local previewers = require('telescope.previewers')
 local conf = require('telescope.config').values
 local actions = require('telescope.actions')
-
-local config = {}
+local utils = require("neuron/utils")
 
 local M = {}
-
-local function on_stderr_factory(name)
-  return vim.schedule_wrap(function(error, data)
-    assert(not error, error)
-    vim.cmd(string.format("echoerr 'An error occured from running %s: %s'", name, data))
-  end)
-end
-
-local function on_exit_factory(name)
-  return vim.schedule_wrap(function(self, code, _signal)
-    if code ~= 0 then
-      error(string.format("The job %s exited with a non-zero code: %s", name, code))
-    end
-  end)
-end
-
-local function feedkeys(string, mode)
-  api.nvim_feedkeys(api.nvim_replace_termcodes(string, true, true, true), mode, true)
-end
 
 function M.rib(opts)
   assert(not NeuronJob, "you already started a neuron server")
@@ -41,7 +20,7 @@ function M.rib(opts)
     command = "neuron",
     cwd = vim.g.neuron_directory or "~/neuron",
     args = {"rib", "-w", "-s", opts.address},
-    on_stderr = on_stderr_factory("neuron rib"),
+    on_stderr = utils.on_stderr_factory("neuron rib"),
   }
   NeuronJob.address = opts.address
   NeuronJob:start()
@@ -70,8 +49,8 @@ function M.open(opts)
     command = "neuron",
     args = {"open"},
     cwd = vim.g.neuron_directory or "~/neuron",
-    on_stderr = on_stderr_factory("neuron open"),
-    on_exit = on_exit_factory("neuron open"),
+    on_stderr = utils.on_stderr_factory("neuron open"),
+    on_exit = utils.on_exit_factory("neuron open"),
   }:start()
 end
 
@@ -81,20 +60,20 @@ function M.new(opts)
   Job:new {
     command = "neuron",
     args = {"new"},
-    cwd = config.neuron_dir,
-    on_stderr = on_stderr_factory("neuron new"),
+    cwd = M.config.neuron_dir,
+    on_stderr = utils.on_stderr_factory("neuron new"),
     on_stdout = vim.schedule_wrap(function(error, data)
       assert(not error, error)
 
       vim.cmd("edit " .. data)
-      feedkeys("Go<CR>#<space>", 'n')
+      utils.feedkeys("Go<CR>#<space>", 'n')
     end),
-    on_exit = on_exit_factory("neuron new"),
+    on_exit = utils.on_exit_factory("neuron new"),
   }:start()
 end
 
 local function gen_from_zettels(entry)
-  local value = string.format("%s/%s", config.neuron_dir, entry.zettelPath)
+  local value = string.format("%s/%s", M.config.neuron_dir, entry.zettelPath)
   local display = entry.zettelTitle
   return {
     display = display,
@@ -112,7 +91,7 @@ end
 local function _find_zettels(opts)
   opts = opts or {}
 
-  local json = lunajson.decode(opts.json).result
+  local json = vim.fn.json_decode(opts.json).result
   local entry_maker = gen_from_zettels
 
   pickers.new(opts, {
@@ -136,9 +115,9 @@ function M.find_zettels(opts)
 
   Job:new {
     command = "neuron",
-    args = {"query"},
-    cwd = opts.cwd or config.neuron_dir,
-    on_stderr = on_stderr_factory("neuron query"),
+    args = {"query", "--cached"},
+    cwd = opts.cwd or M.config.neuron_dir,
+    on_stderr = utils.on_stderr_factory("neuron query"),
     on_stdout = vim.schedule_wrap(function(error, data)
       assert(not error, error)
 
@@ -152,7 +131,8 @@ function M.find_links(opts)
 
   local args = {"query"}
 
-  if not opts.back then
+  opts.back = opts.back or true
+  if opts.back then
     table.insert(args, "--backlinks-of")
   else
     table.insert(args, "--uplinks-of")
@@ -170,8 +150,8 @@ function M.find_links(opts)
     command = "neuron",
     -- args = {"query", "--backlinks-of", opts.id or M.get_current_id(), "--cached"},
     args = args,
-    cwd = opts.cwd or config.neuron_dir,
-    on_stderr = on_stderr_factory("neuron query --backlinks-of"),
+    cwd = opts.cwd or M.config.neuron_dir,
+    on_stderr = utils.on_stderr_factory("neuron query --backlinks-of"),
     on_stdout = vim.schedule_wrap(function(error, data)
       assert(not error, error)
 
@@ -183,6 +163,22 @@ function M.find_links(opts)
   }:start()
 end
 
+function M.enter_link()
+  local word = vim.fn.expand("<cWORD>")
+
+  local left_id = string.match(word, '%[%[(.*)%]%]') -- if it is [[id]]
+  local right_id = string.match(left_id or '', '%[(.*)%]') -- check if there is one more layer of [], if it is [[[id]]]
+  local id = right_id or left_id
+
+  if id == nil then
+    error("There is no link under the cursor")
+  end
+
+  utils.path_from_id(id, M.config.neuron_dir, function(path)
+    vim.cmd("edit " .. path)
+  end)
+end
+
 do
   local default_config = {
     neuron_dir = os.getenv("HOME") .. "/" .. "neuron",
@@ -190,7 +186,7 @@ do
 
   function M.setup(user_config)
     user_config = user_config or {}
-    config = vim.tbl_extend("keep", user_config, default_config)
+    M.config = vim.tbl_extend("keep", user_config, default_config)
   end
 end
 
