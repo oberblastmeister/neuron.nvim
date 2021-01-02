@@ -180,28 +180,32 @@ end
 
 function M.add_all_virtual_titles(buf)
   for ln, line in ipairs(api.nvim_buf_get_lines(buf, 0, -1, true)) do
-    if line ~= nil or line ~= "" then
-      local start_col, end_col = utils.match_link_idx(line)
-      local id = utils.match_link(line)
-      if id ~= nil then
-        cmd.query_id(id, M.config.neuron_dir, function(json)
-          if not json then
-            return
-          end
+    M.add_current_virtual_title(buf, ln, line)
+  end
+end
 
-          if json.error then
-            return
-          end
+function M.add_current_virtual_title(buf, ln, line)
+  if line ~= nil or line ~= "" then
+    local start_col, end_col = utils.match_link_idx(line)
+    local id = utils.match_link(line)
+    if id ~= nil then
+      cmd.query_id(id, M.config.neuron_dir, function(json)
+        if not json then
+          return
+        end
 
-          local title = json.result.zettelTitle
-          -- lua is one indexed
-          -- api.nvim_buf_set_virtual_text(buf, ns, ln - 1, {{title, "TabLineFill"}}, {})
-          api.nvim_buf_set_extmark(buf, ns, ln - 1, start_col - 1, {
+        if json.error then
+          return
+        end
+
+        local title = json.result.zettelTitle
+        -- lua is one indexed
+        -- api.nvim_buf_set_virtual_text(buf, ns, ln - 1, {{title, "TabLineFill"}}, {})
+        api.nvim_buf_set_extmark(buf, ns, ln - 1, start_col - 1, {
             end_col = end_col - 1,
             virt_text = {{title, "TabLineFill"}},
           })
-        end)
-      end
+      end)
     end
   end
 end
