@@ -39,14 +39,19 @@ function M.feedkeys(string, mode)
   api.nvim_feedkeys(api.nvim_replace_termcodes(string, true, true, true), mode, true)
 end
 
-function M.match_link(string)
-  local left_id = string.match(string, '%[%[(.*)%]%]') -- if it is [[id]]
-  local right_id = string.match(left_id or '', '%[(.*)%]') -- check if there is one more layer of [], if it is [[[id]]]
-  return right_id or left_id
+function M.match_link(s)
+  local folgezettel = string.match(s, '^%[%[%[(.+)%]%]%]$') -- if it is [[id]]
+
+  if folgezettel == nil then
+    return string.match(s, '^%[%[(.+)%]%]$')
+  end
+
+  -- local right_id = s.match(left_id or '', '%[(.*)%]') -- check if there is one more layer of [], if it is [[[id]]]
+  -- return right_id or left_id
 end
 
 function M.match_link_idx(string)
-  local i, j = string.find(string, '%[%[(.*)%]%]')
+  local i, j = string.find(string, '%[%[(.+)%]%]')
   return i, j
 end
 

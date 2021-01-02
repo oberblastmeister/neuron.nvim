@@ -181,15 +181,53 @@ end
 function M.add_virtual_titles(buf)
   for ln, line in ipairs(api.nvim_buf_get_lines(buf, 0, -1, true)) do
     if line ~= nil or line ~= "" then
-      local id = utils.match_link(line) 
+      local start_col, end_col = utils.match_link_idx(line)
+      local id = utils.match_link(line)
+      print('id is', id)
       if id then
         cmd.query_id(id, M.config.neuron_dir, function(json)
+          if json.error then
+            return
+          end
+
           local title = json.result.zettelTitle
           -- lua is one indexed
-          api.nvim_buf_set_virtual_text(buf, ns, ln - 1, {{title, "TabLineFill"}}, {})
+          -- api.nvim_buf_set_virtual_text(buf, ns, ln - 1, {{title, "TabLineFill"}}, {})
+          api.nvim_buf_set_extmark(buf, ns, ln - 1, start_col - 1, {
+            end_col = end_col - 1,
+            virt_text = {{title, "TabLineFill"}},
+          })
         end)
       end
     end
+  end
+end
+
+function M.update_virtual_titles(buf)
+  api.nvim_buf_clear_namespace(buf, ns, 0, -1)
+  M.add_virtual_titles()
+end
+
+do
+  local lock = false
+
+  function M.attach_buffer()
+    api.nvim_buf_attach(0, true, {
+        on_lines = vim.schedule_wrap(function(...)
+          local params = {...}
+
+          if lock == false then
+            vim.defer_fn(function()
+              M.update_virtual_titles(params[2])
+
+              -- done
+              lock = false
+            end, 200)
+
+            lock = true
+          end
+        end)
+      })
   end
 end
 
@@ -198,10 +236,20 @@ do
     neuron_dir = os.getenv("HOME") .. "/" .. "neuron",
   }
 
+  local function setup_autocmds()
+    vim.cmd [[augroup NeuronVirtualText]]
+    vim.cmd [[au!]]
+    vim.cmd [[au BufRead * lua require'neuron'.update_virtual_titles()]]
+    vim.cmd [[au BufRead * lua require'neuron'.attach_buffer()]]
+    vim.cmd [[augroup END]]
+  end
+
   function M.setup(user_config)
     user_config = user_config or {}
     M.config = vim.tbl_extend("keep", user_config, default_config)
     ns = api.nvim_create_namespace("neuron.nvim")
+
+    setup_autocmds()
   end
 end
 
