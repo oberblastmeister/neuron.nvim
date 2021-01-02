@@ -207,7 +207,6 @@ function M.add_virtual_title_current_line(buf, ln, line)
           })
       end)
     else
-      print('clearing namespace')
       api.nvim_buf_clear_namespace(buf, ns, ln - 1, ln)
     end
   end
@@ -219,12 +218,12 @@ function M.update_virtual_titles(buf)
 end
 
 do
-  local function on_lines(...)
-    local params = {...}
+  local function on_lines(params)
+    -- local params = {...}
     local buf = params[2]
-    local changedtick = params[3]
+    -- local changedtick = params[3]
     local firstline = params[4]
-    local lastline = params[5]
+    -- local lastline = params[5]
     local new_lastline = params[6]
 
     local lines = api.nvim_buf_get_lines(buf, firstline, new_lastline, false)
@@ -235,15 +234,29 @@ do
         api.nvim_buf_del_extmark(buf, ns, v[1])
       end
     else
-      for i = firstline, new_lastline - 1 do
+      for i = firstline, new_lastline - 1 do -- minus one because in lua loop range is inclusive
         M.add_virtual_title_current_line(buf, i + 1, lines[i - firstline + 1])
       end
     end
   end
 
-  function M.attach_buffer_better()
+  local lock = false
+
+  function M.attach_buffer_fast()
     api.nvim_buf_attach(0, true, {
-        on_lines = vim.schedule_wrap(on_lines)
+        on_lines = vim.schedule_wrap(function(...)
+          if lock == false then
+            local params = {...}
+            vim.defer_fn(function()
+              on_lines(params)
+
+              -- done
+              lock = false
+            end, 100)
+
+            lock = true -- lock it for better perf
+          end
+        end)
       })
   end
 end
@@ -284,7 +297,7 @@ do
     -- vim.cmd(string.format("au BufRead %s lua require'neuron'.update_virtual_titles()", pattern))
     -- vim.cmd(string.format("au BufRead %s lua require'neuron'.attach_buffer()", pattern))
     vim.cmd(string.format("au BufRead %s lua require'neuron'.add_all_virtual_titles()", pattern))
-    vim.cmd(string.format("au BufRead %s lua require'neuron'.attach_buffer_better()", pattern))
+    vim.cmd(string.format("au BufRead %s lua require'neuron'.attach_buffer_fast()", pattern))
     vim.cmd [[augroup END]]
   end
 
