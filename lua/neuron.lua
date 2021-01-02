@@ -180,11 +180,11 @@ end
 
 function M.add_all_virtual_titles(buf)
   for ln, line in ipairs(api.nvim_buf_get_lines(buf, 0, -1, true)) do
-    M.add_current_virtual_title(buf, ln, line)
+    M.add_virtual_title_current_line(buf, ln, line)
   end
 end
 
-function M.add_current_virtual_title(buf, ln, line)
+function M.add_virtual_title_current_line(buf, ln, line)
   if line ~= nil or line ~= "" then
     local start_col, end_col = utils.match_link_idx(line)
     local id = utils.match_link(line)
@@ -206,6 +206,9 @@ function M.add_current_virtual_title(buf, ln, line)
             virt_text = {{title, "TabLineFill"}},
           })
       end)
+    else
+      print('clearing namespace')
+      api.nvim_buf_clear_namespace(buf, ns, ln - 1, ln)
     end
   end
 end
@@ -213,6 +216,36 @@ end
 function M.update_virtual_titles(buf)
   api.nvim_buf_clear_namespace(buf, ns, 0, -1)
   M.add_all_virtual_titles()
+end
+
+do
+  local function on_lines(...)
+    local params = {...}
+    local buf = params[2]
+    local changedtick = params[3]
+    local firstline = params[4]
+    local lastline = params[5]
+    local new_lastline = params[6]
+
+    local lines = api.nvim_buf_get_lines(buf, firstline, new_lastline, false)
+
+    if #lines == 0 then
+      local extmarks = api.nvim_buf_get_extmarks(0, ns, {firstline, 0}, {new_lastline, 0}, {})
+      for _, v in ipairs(extmarks) do
+        api.nvim_buf_del_extmark(buf, ns, v[1])
+      end
+    else
+      for i = firstline, new_lastline - 1 do
+        M.add_virtual_title_current_line(buf, i + 1, lines[i - firstline + 1])
+      end
+    end
+  end
+
+  function M.attach_buffer_better()
+    api.nvim_buf_attach(0, true, {
+        on_lines = vim.schedule_wrap(on_lines)
+      })
+  end
 end
 
 do
@@ -244,10 +277,14 @@ do
   }
 
   local function setup_autocmds()
+    local pattern = string.format("%s/*.md", M.config.neuron_dir)
+
     vim.cmd [[augroup NeuronVirtualText]]
     vim.cmd [[au!]]
-    vim.cmd [[au BufRead * lua require'neuron'.update_virtual_titles()]]
-    vim.cmd [[au BufRead * lua require'neuron'.attach_buffer()]]
+    -- vim.cmd(string.format("au BufRead %s lua require'neuron'.update_virtual_titles()", pattern))
+    -- vim.cmd(string.format("au BufRead %s lua require'neuron'.attach_buffer()", pattern))
+    vim.cmd(string.format("au BufRead %s lua require'neuron'.add_all_virtual_titles()", pattern))
+    vim.cmd(string.format("au BufRead %s lua require'neuron'.attach_buffer_better()", pattern))
     vim.cmd [[augroup END]]
   end
 
