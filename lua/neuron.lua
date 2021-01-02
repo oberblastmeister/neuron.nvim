@@ -183,8 +183,7 @@ function M.add_virtual_titles(buf)
     if line ~= nil or line ~= "" then
       local start_col, end_col = utils.match_link_idx(line)
       local id = utils.match_link(line)
-      print('id is', id)
-      if id then
+      if id ~= nil then
         cmd.query_id(id, M.config.neuron_dir, function(json)
           if json.error then
             return

@@ -40,11 +40,13 @@ function M.feedkeys(string, mode)
 end
 
 function M.match_link(s)
-  local folgezettel = string.match(s, '^%[%[%[(.+)%]%]%]$') -- if it is [[id]]
+  local folgezettel = string.match(s, '%[%[%[(.+)%]%]%]') -- if it is [[id]]
 
   if folgezettel == nil then
-    return string.match(s, '^%[%[(.+)%]%]$')
+    folgezettel =  string.match(s, '%[%[(.+)%]%]')
   end
+
+  return folgezettel
 
   -- local right_id = s.match(left_id or '', '%[(.*)%]') -- check if there is one more layer of [], if it is [[[id]]]
   -- return right_id or left_id
