@@ -207,7 +207,12 @@ function M.add_virtual_title_current_line(buf, ln, line)
           })
       end)
     else
-      api.nvim_buf_clear_namespace(buf, ns, ln - 1, ln)
+      -- need because the user might do `norm! x` from a valid link
+      -- the link then becomes invalid so we need to remove it
+      utils.delete_range_extmark(buf, ns, ln - 1, ln) -- minus one to convert from 1 based index to api zero based index
+
+      -- this also should work
+      -- api.nvim_buf_clear_namespace(buf, ns, ln - 1, ln)
     end
   end
 end
@@ -229,10 +234,11 @@ do
     local lines = api.nvim_buf_get_lines(buf, firstline, new_lastline, false)
 
     if #lines == 0 then
-      local extmarks = api.nvim_buf_get_extmarks(0, ns, {firstline, 0}, {new_lastline, 0}, {})
-      for _, v in ipairs(extmarks) do
-        api.nvim_buf_del_extmark(buf, ns, v[1])
-      end
+      utils.delete_range_extmark(buf, ns, firstline, new_lastline)
+      -- local extmarks = api.nvim_buf_get_extmarks(0, ns, {firstline, 0}, {new_lastline, 0}, {})
+      -- for _, v in ipairs(extmarks) do
+      --   api.nvim_buf_del_extmark(buf, ns, v[1])
+      -- end
     else
       for i = firstline, new_lastline - 1 do -- minus one because in lua loop range is inclusive
         M.add_virtual_title_current_line(buf, i + 1, lines[i - firstline + 1])

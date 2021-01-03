@@ -54,4 +54,12 @@ function M.match_link_idx(string)
   return i, j
 end
 
+-- deletes a range of extmarks line wise, zero based index
+function M.delete_range_extmark(buf, namespace, start, finish)
+  local extmarks = api.nvim_buf_get_extmarks(buf, namespace, {start, 0}, {finish, 0}, {})
+  for _, v in ipairs(extmarks) do
+    api.nvim_buf_del_extmark(buf, namespace, v[1])
+  end
+end
+
 return M
