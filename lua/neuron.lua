@@ -389,4 +389,8 @@ function M.goto_prev_extmark()
   api.nvim_win_set_cursor(0, {next_extmark[2] + 1, next_extmark[3]})
 end
 
+function M.goto_index()
+  vim.cmd(string.format("edit %s/index.md", M.config.neuron_dir))
+end
+
 return M

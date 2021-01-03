@@ -17,7 +17,7 @@ end
 function M.query(arg_opts, neuron_dir, json_fn)
   M.neuron {
     args = M.query_arg_maker(arg_opts),
-    cwd = neuron_dir,
+    neuron_dir = neuron_dir,
     name = "neuron query",
     callback = json_fn,
   }
@@ -43,7 +43,7 @@ end
 function M.query_id(id, neuron_dir, json_fn)
   M.neuron {
     args = {"query", "--cached", "--id", id},
-    cwd = neuron_dir,
+    neuron_dir = neuron_dir,
     name = "neuron query --id",
     callback = json_fn,
   }
