@@ -98,7 +98,7 @@ local function _find_zettels(opts)
   local entry_maker = gen_from_zettels
 
   pickers.new(opts, {
-    prompt_title = 'Find Zettels',
+    prompt_title = opts.title or 'Find Zettels',
     finder = finders.new_table {
       results = json,
       entry_maker = opts.entry_maker or entry_maker,
@@ -129,7 +129,7 @@ function M.find_zettels(opts)
   }:start()
 end
 
-function M.find_links(opts)
+function M.find_backlinks(opts)
   opts = opts or {}
 
   local args = {"query"}
@@ -157,6 +157,7 @@ function M.find_links(opts)
       assert(not error, error)
 
       _find_zettels {
+        title = 'Find Backlinks',
         json = data,
         entry_maker = gen_from_links
       }
@@ -202,8 +203,9 @@ function M.add_virtual_title_current_line(buf, ln, line)
         -- lua is one indexed
         -- api.nvim_buf_set_virtual_text(buf, ns, ln - 1, {{title, "TabLineFill"}}, {})
         api.nvim_buf_set_extmark(buf, ns, ln - 1, start_col - 1, {
-            end_col = end_col - 1,
+            end_col = end_col,
             virt_text = {{title, "TabLineFill"}},
+            -- hl_group = "TabLineSel", -- might make neovim slow
           })
       end)
     else
@@ -357,6 +359,34 @@ function M.goto_next_link()
   else
     error("No more next links")
   end
+end
+
+function M.goto_next_extmark()
+  local tuple = api.nvim_win_get_cursor(0) -- (1, 0) based index
+  tuple[1] = tuple[1] - 1 -- convert to zero based
+
+  local extmarks = api.nvim_buf_get_extmarks(0, ns, {tuple[1], tuple[2] + 1}, -1, {}) -- plus one because we don't want the current extmark
+
+  local next_extmark = extmarks[1]
+  if next_extmark == nil then
+    error("No more next extmarks")
+  end
+
+  api.nvim_win_set_cursor(0, {next_extmark[2] + 1, next_extmark[3]})
+end
+
+function M.goto_prev_extmark()
+  local tuple = api.nvim_win_get_cursor(0) -- (1, 0) based index
+  tuple[1] = tuple[1] - 1 -- convert to zero based
+
+  local extmarks = api.nvim_buf_get_extmarks(0, ns, {tuple[1], tuple[2] - 1}, 0, {}) -- plus one because we don't want the current extmark
+
+  local next_extmark = extmarks[1]
+  if next_extmark == nil then
+    error("No more previous extmarks")
+  end
+
+  api.nvim_win_set_cursor(0, {next_extmark[2] + 1, next_extmark[3]})
 end
 
 return M
