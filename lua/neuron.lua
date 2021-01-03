@@ -190,7 +190,7 @@ function M.add_virtual_title_current_line(buf, ln, line)
     local id = utils.match_link(line)
     if id ~= nil then
       cmd.query_id(id, M.config.neuron_dir, function(json)
-        if not json then
+        if json == nil then
           return
         end
 
@@ -259,7 +259,7 @@ do
             vim.defer_fn(function()
               on_lines(task)
               task = nil
-            end, 100)
+            end, 150)
           end
         end)
       })
@@ -312,6 +312,50 @@ do
     ns = api.nvim_create_namespace("neuron.nvim")
 
     setup_autocmds()
+  end
+end
+
+function M.next_link_idx() -- returns (1, 0 based index)
+  local tuple = api.nvim_win_get_cursor(0) -- (1, 0) based index
+
+  local current_ln = tuple[1] - 1
+  local current_col = tuple[2]
+
+  local line_end = api.nvim_buf_line_count(0) - 1
+
+  local current = true
+  for ln = current_ln, line_end do -- ln is 0 based
+    local line = api.nvim_buf_get_lines(0, ln, ln + 1, true)[1]
+
+    local col_lua_idx = current_col + 1 -- convert to lua idx
+
+    local sub
+    if current then
+      sub = string.sub(line, col_lua_idx)
+    else
+      sub = line
+    end
+
+    local matched = utils.match_link_idx(sub)
+
+    if matched ~= nil then
+      if current then
+        return {ln + 1, matched + col_lua_idx} -- returns (1, 0) based index
+      else
+        return {ln + 1, matched + 1}
+      end
+    end
+
+    current = false
+  end
+end
+
+function M.goto_next_link()
+  local tuple = M.next_link_idx()
+  if tuple ~= nil then
+    api.nvim_win_set_cursor(0, tuple)
+  else
+    error("No more next links")
   end
 end
 
