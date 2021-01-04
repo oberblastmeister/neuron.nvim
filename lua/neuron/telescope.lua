@@ -29,6 +29,15 @@ local function gen_from_links(entry)
   return gen_from_zettels(not_folgezettal)
 end
 
+local function gen_from_tags(entry)
+  local display = entry.name
+  return {
+    display = display,
+    value = display,
+    ordinal = display,
+  }
+end
+
 local function find_zettels_json(opts)
   opts = opts or {}
 
@@ -80,6 +89,18 @@ function M.find_backlinks(opts)
     opts.json = json
     opts.title = 'Find Backlinks'
     opts.entry_maker = gen_from_links
+    find_zettels_json(opts)
+  end)
+end
+
+function M.find_tags(opts)
+  opts = opts or {}
+
+  cmd.query({uri = "z:tags"}, neuron.config.neuron_dir, function(json)
+    opts.json = json
+    opts.title = "Find Tags"
+    opts.entry_maker = gen_from_tags
+    opts.previewer = false -- TODO: find better way to preview
     find_zettels_json(opts)
   end)
 end

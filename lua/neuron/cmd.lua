@@ -27,6 +27,12 @@ end
 function M.query_arg_maker(opts)
   local args = {"query"}
 
+  if opts.uri then
+    table.insert(args, "--uri")
+    table.insert(args, opts.uri)
+    return args
+  end
+
   if opts.up then
     table.insert(args, "--uplinks-of")
     table.insert(args, opts.id)
