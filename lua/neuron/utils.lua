@@ -78,4 +78,8 @@ function M.os_open(path)
   }:start()
 end
 
+function M.get_localhost_address(s)
+  return s:gsub('.+(:%d+)', 'localhost%1')
+end
+
 return M

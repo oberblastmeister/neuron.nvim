@@ -18,7 +18,9 @@ function M.rib(opts)
 
   opts = opts or {}
   opts.address = opts.address or "127.0.0.1:8080"
+  opts.open = opts.open or true
 
+  NeuronJob = {}
   NeuronJob = Job:new {
     command = "neuron",
     cwd = vim.g.neuron_directory or "~/neuron",
@@ -37,7 +39,9 @@ function M.rib(opts)
     print("Started neuron server at", opts.address)
   end
 
-  utils.os_open([[']] .. opts.address .. [[']])
+  local open_address = utils.get_localhost_address(opts.address)
+
+  utils.os_open(open_address)
 end
 
 function M.stop()
@@ -57,6 +61,12 @@ function M.open(opts)
     on_stderr = utils.on_stderr_factory("neuron open"),
     on_exit = utils.on_exit_factory("neuron open"),
   }:start()
+end
+
+function M.open_from_server(opts)
+  opts = opts or {}
+
+  utils.os_open(utils.get_localhost_address(NeuronJob.address))
 end
 
 function M.new(opts)
@@ -306,7 +316,10 @@ end
 
 do
   local default_config = {
-    neuron_dir = os.getenv("HOME") .. "/" .. "neuron",
+    neuron_dir = os.getenv("HOME") .. "/" .. "neuron", -- your main neuron directory
+    mappings = true, -- to set default mappings
+    virtual_titles = true, -- set virtual titles
+    run = nil, -- custom code to run
   }
 
   local function setup_autocmds()
@@ -314,10 +327,16 @@ do
 
     vim.cmd [[augroup NeuronVirtualText]]
     vim.cmd [[au!]]
-    -- vim.cmd(string.format("au BufRead %s lua require'neuron'.update_virtual_titles()", pattern))
-    -- vim.cmd(string.format("au BufRead %s lua require'neuron'.attach_buffer()", pattern))
-    vim.cmd(string.format("au BufRead %s lua require'neuron'.add_all_virtual_titles()", pattern))
-    vim.cmd(string.format("au BufRead %s lua require'neuron'.attach_buffer_fast()", pattern))
+    if M.config.virtual_titles == true then
+      vim.cmd(string.format("au BufRead %s lua require'neuron'.add_all_virtual_titles()", pattern))
+      vim.cmd(string.format("au BufRead %s lua require'neuron'.attach_buffer_fast()", pattern))
+    end
+    if M.config.mappings == true then
+      vim.cmd(string.format("au BufRead %s lua require'neuron/mappings'.setup()", pattern))
+    end
+    if M.config.run ~= nil then
+      vim.cmd(string.format("au BufRead %s lua require'neuron'.config.run()", pattern))
+    end
     vim.cmd [[augroup END]]
   end
 
