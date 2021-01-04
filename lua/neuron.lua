@@ -87,11 +87,6 @@ function M.new(opts)
   }:start()
 end
 
-function M.get_current_id()
-  local path = vim.fn.expand("%:t")
-  return path:sub(1, -4)
-end
-
 function M.enter_link()
   local word = vim.fn.expand("<cWORD>")
 
@@ -238,41 +233,6 @@ do
     ns = api.nvim_create_namespace("neuron.nvim")
 
     setup_autocmds()
-  end
-end
-
-function M.next_link_idx() -- returns (1, 0 based index)
-  local tuple = api.nvim_win_get_cursor(0) -- (1, 0) based index
-
-  local current_ln = tuple[1] - 1
-  local current_col = tuple[2]
-
-  local line_end = api.nvim_buf_line_count(0) - 1
-
-  local current = true
-  for ln = current_ln, line_end do -- ln is 0 based
-    local line = api.nvim_buf_get_lines(0, ln, ln + 1, true)[1]
-
-    local col_lua_idx = current_col + 1 -- convert to lua idx
-
-    local sub
-    if current then
-      sub = string.sub(line, col_lua_idx)
-    else
-      sub = line
-    end
-
-    local matched = utils.find_link(sub)
-
-    if matched ~= nil then
-      if current then
-        return {ln + 1, matched + col_lua_idx} -- returns (1, 0) based index
-      else
-        return {ln + 1, matched + 1}
-      end
-    end
-
-    current = false
   end
 end
 
