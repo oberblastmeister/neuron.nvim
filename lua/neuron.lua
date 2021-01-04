@@ -36,6 +36,8 @@ function M.rib(opts)
   if opts.verbose then
     print("Started neuron server at", opts.address)
   end
+
+  utils.os_open([[']] .. opts.address .. [[']])
 end
 
 function M.stop()
@@ -175,7 +177,8 @@ function M.enter_link()
   end
 
   cmd.query_id(id, M.config.neuron_dir, function(json)
-    vim.cmd("edit " .. json.result.zettelPath)
+    -- vim.cmd("edit " .. json.result.zettelPath)
+    vim.cmd(string.format("edit %s/%s", M.config.neuron_dir, json.result.zettelPath))
   end)
 end
 
@@ -187,7 +190,7 @@ end
 
 function M.add_virtual_title_current_line(buf, ln, line)
   if line ~= nil or line ~= "" then
-    local start_col, end_col = utils.match_link_idx(line)
+    local start_col, end_col = utils.find_link(line)
     local id = utils.match_link(line)
     if id ~= nil then
       cmd.query_id(id, M.config.neuron_dir, function(json)
@@ -225,13 +228,13 @@ function M.update_virtual_titles(buf)
 end
 
 do
-  local function on_lines(params)
-    -- local params = {...}
-    local buf = params[2]
-    -- local changedtick = params[3]
-    local firstline = params[4]
-    -- local lastline = params[5]
-    local new_lastline = params[6]
+  local function on_lines(buf, firstline, new_lastline)
+    -- -- local params = {...}
+    -- local buf = params[2]
+    -- -- local changedtick = params[3]
+    -- local firstline = params[4]
+    -- -- local lastline = params[5]
+    -- local new_lastline = params[6]
 
     local lines = api.nvim_buf_get_lines(buf, firstline, new_lastline, false)
 
@@ -243,7 +246,12 @@ do
       -- end
     else
       for i = firstline, new_lastline - 1 do -- minus one because in lua loop range is inclusive
-        M.add_virtual_title_current_line(buf, i + 1, lines[i - firstline + 1])
+        local async
+        async = uv.new_async(vim.schedule_wrap(function(...)
+          M.add_virtual_title_current_line(...)
+          async:close()
+        end))
+        async:send(buf, i + 1, lines[i - firstline + 1])
       end
     end
   end
@@ -259,7 +267,12 @@ do
 
           if empty then
             vim.defer_fn(function()
-              on_lines(task)
+              local async
+              async = uv.new_async(vim.schedule_wrap(function(...)
+                on_lines(...)
+                async:close()
+              end))
+              async:send(task[2], task[4], task[6])
               task = nil
             end, 150)
           end
@@ -273,21 +286,21 @@ do
 
   function M.attach_buffer()
     api.nvim_buf_attach(0, true, {
-        on_lines = vim.schedule_wrap(function(...)
-          local params = {...}
+      on_lines = vim.schedule_wrap(function(...)
+        local params = {...}
 
-          if lock == false then
-            vim.defer_fn(function()
-              M.update_virtual_titles(params[2])
+        if lock == false then
+          vim.defer_fn(function()
+            M.update_virtual_titles(params[2])
 
-              -- done
-              lock = false
-            end, 200)
+            -- done
+            lock = false
+          end, 200)
 
-            lock = true
-          end
-        end)
-      })
+          lock = true
+        end
+      end)
+    })
   end
 end
 
@@ -338,7 +351,7 @@ function M.next_link_idx() -- returns (1, 0 based index)
       sub = line
     end
 
-    local matched = utils.match_link_idx(sub)
+    local matched = utils.find_link(sub)
 
     if matched ~= nil then
       if current then
