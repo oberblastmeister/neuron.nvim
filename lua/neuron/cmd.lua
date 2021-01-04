@@ -29,8 +29,10 @@ function M.query_arg_maker(opts)
 
   if opts.up then
     table.insert(args, "--uplinks-of")
-  else
+    table.insert(args, opts.id)
+  elseif opts.back then
     table.insert(args, "--backlinks-of")
+    table.insert(args, opts.id)
   end
 
   if opts.cached == false then

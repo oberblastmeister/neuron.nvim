@@ -82,4 +82,8 @@ function M.get_localhost_address(s)
   return s:gsub('.+(:%d+)', 'localhost%1')
 end
 
+function M.get_current_id()
+  return vim.fn.expand("%:t:r")
+end
+
 return M

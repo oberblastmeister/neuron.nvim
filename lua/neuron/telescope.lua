@@ -18,7 +18,8 @@ local function gen_from_zettels(entry)
   return {
     display = display,
     value = value,
-    ordinal = display
+    ordinal = display,
+    id = entry.zettelID,
   }
 end
 
@@ -28,73 +29,59 @@ local function gen_from_links(entry)
   return gen_from_zettels(not_folgezettal)
 end
 
-local function _find_zettels(opts)
+local function find_zettels_json(opts)
   opts = opts or {}
 
-  local json = vim.fn.json_decode(opts.json).result
-  local entry_maker = gen_from_zettels
-
-  pickers.new(opts, {
+  local picker_opts = {
     prompt_title = opts.title or 'Find Zettels',
     finder = finders.new_table {
-      results = json,
-      entry_maker = opts.entry_maker or entry_maker,
+      results = opts.json.result,
+      entry_maker = opts.entry_maker or gen_from_zettels,
     },
     previewer = opts.previewer or previewers.vim_buffer_cat.new(opts),
     sorter = opts.sorter or conf.generic_sorter(opts),
-  }):find()
+  }
+
+  if opts.insert then
+    picker_opts.attach_mappings = function(_)
+      actions.goto_file_selection_edit:replace(function(prompt_bufnr)
+        actions.close(prompt_bufnr)
+
+        local entry = actions.get_selected_entry()
+        api.nvim_put({entry.id}, "c", true, false)
+      end)
+      return true
+    end
+  end
+
+  pickers.new(opts, picker_opts):find()
 end
 
 function M.find_zettels(opts)
   opts = opts or {}
 
-  Job:new {
-    command = "neuron",
-    args = {"query", "--cached"},
-    cwd = opts.cwd or neuron.config.neuron_dir,
-    on_stderr = utils.on_stderr_factory("neuron query"),
-    on_stdout = vim.schedule_wrap(function(error, data)
-      assert(not error, error)
-
-      _find_zettels {json = data}
-    end)
-  }:start()
+  cmd.query({
+    cached = opts.cached
+  }, neuron.config.neuron_dir, function(json)
+    opts.json = json
+    find_zettels_json(opts)
+  end)
 end
 
 function M.find_backlinks(opts)
   opts = opts or {}
 
-  local args = {"query"}
-
-  opts.back = opts.back or true
-  if opts.back then
-    table.insert(args, "--backlinks-of")
-  else
-    table.insert(args, "--uplinks-of")
-  end
-
-  table.insert(args, opts.id or M.get_current_id())
-
-  if opts.cached ~= false then
-    table.insert(args, "--cached")
-  end
-
-  Job:new {
-    command = "neuron",
-    -- args = {"query", "--backlinks-of", opts.id or M.get_current_id(), "--cached"},
-    args = args,
-    cwd = opts.cwd or neuron.config.neuron_dir,
-    on_stderr = utils.on_stderr_factory("neuron query --backlinks-of"),
-    on_stdout = vim.schedule_wrap(function(error, data)
-      assert(not error, error)
-
-      _find_zettels {
-        title = 'Find Backlinks',
-        json = data,
-        entry_maker = gen_from_links
-      }
-    end)
-  }:start()
+  cmd.query({
+    up = opts.up,
+    back = opts.back or true,
+    id = opts.id or utils.get_current_id(),
+    cached = opts.cached
+  }, neuron.config.neuron_dir, function(json)
+    opts.json = json
+    opts.title = 'Find Backlinks'
+    opts.entry_maker = gen_from_links
+    find_zettels_json(opts)
+  end)
 end
 
 return M
