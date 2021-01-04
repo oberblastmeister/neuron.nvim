@@ -292,29 +292,6 @@ do
 end
 
 do
-  local lock = false
-
-  function M.attach_buffer()
-    api.nvim_buf_attach(0, true, {
-      on_lines = vim.schedule_wrap(function(...)
-        local params = {...}
-
-        if lock == false then
-          vim.defer_fn(function()
-            M.update_virtual_titles(params[2])
-
-            -- done
-            lock = false
-          end, 200)
-
-          lock = true
-        end
-      end)
-    })
-  end
-end
-
-do
   local default_config = {
     neuron_dir = os.getenv("HOME") .. "/" .. "neuron", -- your main neuron directory
     mappings = true, -- to set default mappings
