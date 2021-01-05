@@ -169,12 +169,7 @@ do
 
           if empty then
             vim.defer_fn(function()
-              local async
-              async = uv.new_async(vim.schedule_wrap(function(...)
-                on_lines(...)
-                async:close()
-              end))
-              async:send(task[2], task[4], task[6])
+              on_lines(task[2], task[4], task[6])
               task = nil
             end, 350)
           end
