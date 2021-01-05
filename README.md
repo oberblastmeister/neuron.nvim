@@ -1,6 +1,6 @@
 # neuron.nvim
 
-Make neovim the best note taking application. This plugin uses **neovim 0.5** which to be able to take advantage of the latest cool features.
+Make neovim the best note taking application. This plugin uses **neovim 0.5** to be able to take advantage of the latest cool features.
 
 ## Why
 
@@ -104,3 +104,11 @@ neuron.nvim was heavily inspired by [neuron.vim](https://github.com/fiatjaf/neur
 |render notes|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:
 |supports vim|:x:|:heavy_check_mark:|:heavy_check_mark:
 |use neuron binary|:heavy_check_mark:|:heavy_check_mark:|:x:
+
+## License
+
+Copyright (c) 2020 Brian Shu
+
+neuron.nvim is distributed under the terms of the MIT license.
+
+See the [LICENSE](LICENSE)
