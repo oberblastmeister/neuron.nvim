@@ -4,7 +4,7 @@ function M.setup()
   vim.cmd [[
 nnoremap <buffer> <CR> <cmd>lua require'neuron'.enter_link()<CR>
 
-nnoremap <buffer> gzn <cmd>lua require'neuron'.new()<CR>
+nnoremap <buffer> gzn <cmd>lua require'neuron/cmd'.new(require'neuron'.config.neuron_dir)<CR>
 
 nnoremap <buffer> gzz <cmd>lua require'neuron/telescope'.find_zettels()<CR>
 nnoremap <buffer> gzZ <cmd>lua require'neuron/telescope'.find_zettels {insert = true}<CR>
