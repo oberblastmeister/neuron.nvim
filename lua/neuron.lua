@@ -176,7 +176,7 @@ do
               end))
               async:send(task[2], task[4], task[6])
               task = nil
-            end, 150)
+            end, 350)
           end
         end)
       })
