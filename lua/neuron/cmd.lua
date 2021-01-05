@@ -66,4 +66,34 @@ function M.json_stdout_wrap(json_fn)
   end
 end
 
+function M.new(neuron_dir)
+  Job:new {
+    command = "neuron",
+    args = {"new"},
+    cwd = neuron_dir,
+    on_stderr = utils.on_stderr_factory("neuron new"),
+    on_stdout = vim.schedule_wrap(function(error, data)
+      assert(not error, error)
+
+      vim.cmd("edit " .. data)
+      utils.start_insert_header()
+    end),
+    on_exit = utils.on_exit_factory("neuron new"),
+  }:start()
+end
+
+function M.new_and_callback(neuron_dir, callback)
+  Job:new {
+    command = "neuron",
+    args = {"new"},
+    cwd = neuron_dir,
+    on_stderr = utils.on_stderr_factory("neuron new"),
+    on_stdout = vim.schedule_wrap(function(error, data)
+      assert(not error, error)
+
+      callback(data)
+    end),
+    on_exit = utils.on_exit_factory("neuron new"),
+  }:start()
+end
 return M

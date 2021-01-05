@@ -40,6 +40,10 @@ function M.feedkeys(string, mode)
   api.nvim_feedkeys(api.nvim_replace_termcodes(string, true, true, true), mode, true)
 end
 
+function M.feedraw(s)
+  api.nvim_feedkeys(s, 'n', false)
+end
+
 local TRIPLE_LINK_RE = "%[%[%[(%w%w%w%w%w%w%w%w)%]%]%]"
 local DOUBLE_LINK_RE = "%[%[(%w%w%w%w%w%w%w%w)%]%]"
 
@@ -84,6 +88,10 @@ end
 
 function M.get_current_id()
   return vim.fn.expand("%:t:r")
+end
+
+function M.start_insert_header()
+  M.feedkeys("Go<CR>#<space>", 'n')
 end
 
 return M

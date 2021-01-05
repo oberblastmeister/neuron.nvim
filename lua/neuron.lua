@@ -69,24 +69,6 @@ function M.open_from_server(opts)
   utils.os_open(utils.get_localhost_address(NeuronJob.address))
 end
 
-function M.new(opts)
-  opts = opts or {}
-
-  Job:new {
-    command = "neuron",
-    args = {"new"},
-    cwd = M.config.neuron_dir,
-    on_stderr = utils.on_stderr_factory("neuron new"),
-    on_stdout = vim.schedule_wrap(function(error, data)
-      assert(not error, error)
-
-      vim.cmd("edit " .. data)
-      utils.feedkeys("Go<CR>#<space>", 'n')
-    end),
-    on_exit = utils.on_exit_factory("neuron new"),
-  }:start()
-end
-
 function M.enter_link()
   local word = vim.fn.expand("<cWORD>")
 

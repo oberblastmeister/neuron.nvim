@@ -13,7 +13,6 @@ nnoremap <buffer> gzb <cmd>lua require'neuron/telescope'.find_backlinks()<CR>
 nnoremap <buffer> gzB <cmd>lua require'neuron/telescope'.find_backlinks {insert = true}<CR>
 
 nnoremap <buffer> gzt <cmd>lua require'neuron/telescope'.find_tags()<CR>
-nnoremap <buffer> gzT <cmd>lua require'neuron/telescope'.find_tags {insert = true}<CR>
 
 nnoremap <buffer> gzs <cmd>lua require'neuron'.rib {address = "127.0.0.1:8200", verbose = true}<CR>
 
