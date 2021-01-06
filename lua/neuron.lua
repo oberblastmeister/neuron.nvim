@@ -175,19 +175,20 @@ do
     mappings = true, -- to set default mappings
     virtual_titles = true, -- set virtual titles
     run = nil, -- custom code to run
+    leader = "gz", -- the leader key to for all mappings
   }
 
   local function setup_autocmds()
     local pattern = string.format("%s/*.md", M.config.neuron_dir)
 
-    vim.cmd [[augroup NeuronVirtualText]]
+    vim.cmd [[augroup Neuron]]
     vim.cmd [[au!]]
     if M.config.virtual_titles == true then
       vim.cmd(string.format("au BufRead %s lua require'neuron'.add_all_virtual_titles()", pattern))
       vim.cmd(string.format("au BufRead %s lua require'neuron'.attach_buffer_fast()", pattern))
     end
     if M.config.mappings == true then
-      vim.cmd(string.format("au BufRead %s lua require'neuron/mappings'.setup()", pattern))
+      require"neuron/mappings".setup()
     end
     if M.config.run ~= nil then
       vim.cmd(string.format("au BufRead %s lua require'neuron'.config.run()", pattern))
@@ -196,6 +197,10 @@ do
   end
 
   function M.setup(user_config)
+    if vim.fn.executable("neuron") == 0 then
+      error("neuron is not executable")
+    end
+
     user_config = user_config or {}
     M.config = vim.tbl_extend("keep", user_config, default_config)
     ns = api.nvim_create_namespace("neuron.nvim")
