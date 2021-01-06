@@ -51,18 +51,6 @@ function M.stop()
   end
 end
 
-function M.open(opts)
-  opts = opts or {}
-
-  Job:new {
-    command = "neuron",
-    args = {"open"},
-    cwd = vim.g.neuron_directory or "~/neuron",
-    on_stderr = utils.on_stderr_factory("neuron open"),
-    on_exit = utils.on_exit_factory("neuron open"),
-  }:start()
-end
-
 function M.open_from_server(opts)
   opts = opts or {}
 
@@ -173,7 +161,10 @@ do
               task = nil
             end, 350)
           end
-        end)
+        end),
+        on_detach = function()
+          task = nil
+        end
       })
   end
 end

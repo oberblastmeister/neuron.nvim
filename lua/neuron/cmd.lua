@@ -66,7 +66,7 @@ function M.json_stdout_wrap(json_fn)
   end
 end
 
-function M.new(neuron_dir)
+function M.new_edit(neuron_dir)
   Job:new {
     command = "neuron",
     args = {"new"},

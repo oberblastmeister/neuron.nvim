@@ -8,7 +8,7 @@ Neovim combined with lua and the neuron binary allow one of the coolest note tak
 
 ## Features
 
-- Great integration with [telescope.nvim](https://github.com/nvim-telescope/telescope.nvim) (currently the most extensibly fuzzy finder)
+- Great integration with [telescope.nvim](https://github.com/nvim-telescope/telescope.nvim) (currently the most extensible fuzzy finder)
 - Because of that integration, can find tags, backlinks, notes
 - Uses the new extmark api, sets an extmark for each valid link
 - Fast because written in lua rather than vimscript
@@ -62,7 +62,7 @@ After running the setup function opening a note will show virtual text on the si
 nnoremap <buffer> <CR> <cmd>lua require'neuron'.enter_link()<CR>
 
 " create a new note
-nnoremap <buffer> gzn <cmd>lua require'neuron'.new()<CR>
+nnoremap <buffer> gzn <cmd>lua require'neuron/cmd'.new_edit(require'neuron'.config.neuron_dir)<CR>
 
 " find your notes, click enter to create the note if there are not notes that match
 nnoremap <buffer> gzz <cmd>lua require'neuron/telescope'.find_zettels()<CR>
