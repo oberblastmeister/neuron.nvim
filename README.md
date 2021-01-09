@@ -87,6 +87,10 @@ nnoremap <buffer> gz] <cmd>lua require'neuron'.goto_next_extmark()<CR>
 nnoremap <buffer> gz[ <cmd>lua require'neuron'.goto_prev_extmark()<CR>]]
 ```
 
+## Syntax Highlighting
+
+neuron.nvim does not provide its own syntax highlighting out of the box because there are many better options. I recommend [nvim-treesitter](https://github.com/nvim-treesitter/nvim-treesitter) because it currently offers the best syntax highlighting and also also to highlight code fences.
+
 ## Comparisons
 
 neuron.nvim was heavily inspired by [neuron.vim](https://github.com/fiatjaf/neuron.vim). Here is table table to show the differences. I also used to use [vimwiki](https://github.com/vimwiki/vimwiki) so there is a comparison to that also.
