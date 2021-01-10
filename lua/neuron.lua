@@ -25,9 +25,8 @@ function M.rib(opts)
     Job:new {
     command = "neuron",
     cwd = M.config.neuron_dir,
-    -- args = {"gen"}
-    args = {"rib", "-w", "-s", opts.address}
-    -- on_stderr = utils.on_stderr_factory("neuron rib")
+    args = {"rib", "-w", "-s", opts.address},
+    on_stderr = utils.on_stderr_factory("neuron rib")
   }
   NeuronJob.address = opts.address
   NeuronJob:start()
@@ -200,7 +199,7 @@ end
 
 do
   local default_config = {
-    neuron_dir = os.getenv("HOME") .. "/" .. "neuron", -- your main neuron directory
+    neuron_dir = "~/neuron",
     mappings = true, -- to set default mappings
     virtual_titles = true, -- set virtual titles
     run = nil, -- custom code to run
@@ -232,6 +231,8 @@ do
 
     user_config = user_config or {}
     M.config = vim.tbl_extend("keep", user_config, default_config)
+    M.config.neuron_dir = vim.fn.expand(M.config.neuron_dir)
+
     ns = api.nvim_create_namespace("neuron.nvim")
 
     setup_autocmds()
