@@ -1,11 +1,11 @@
 local Job = require("plenary/job")
 local uv = vim.loop
-local pickers = require('telescope.pickers')
+local pickers = require("telescope.pickers")
 local api = vim.api
-local finders = require('telescope.finders')
-local previewers = require('telescope.previewers')
-local conf = require('telescope.config').values
-local actions = require('telescope.actions')
+local finders = require("telescope.finders")
+local previewers = require("telescope.previewers")
+local conf = require("telescope.config").values
+local actions = require("telescope.actions")
 local utils = require("neuron/utils")
 local cmd = require("neuron/cmd")
 
@@ -21,11 +21,13 @@ function M.rib(opts)
   opts.open = opts.open or true
 
   NeuronJob = {}
-  NeuronJob = Job:new {
+  NeuronJob =
+    Job:new {
     command = "neuron",
-    cwd = vim.g.neuron_directory or "~/neuron",
-    args = {"rib", "-w", "-s", opts.address},
-    on_stderr = utils.on_stderr_factory("neuron rib"),
+    cwd = M.config.neuron_dir,
+    -- args = {"gen"}
+    args = {"rib", "-w", "-s", opts.address}
+    -- on_stderr = utils.on_stderr_factory("neuron rib")
   }
   NeuronJob.address = opts.address
   NeuronJob:start()
@@ -66,14 +68,18 @@ function M.enter_link()
     error("There is no link under the cursor")
   end
 
-  cmd.query_id(id, M.config.neuron_dir, function(json)
-    -- vim.cmd("edit " .. json.result.zettelPath)
-    vim.cmd(string.format("edit %s/%s", M.config.neuron_dir, json.result.zettelPath))
-  end)
+  cmd.query_id(
+    id,
+    M.config.neuron_dir,
+    function(json)
+      -- vim.cmd("edit " .. json.result.zettelPath)
+      vim.cmd(string.format("edit %s", json.result.Right.zettelPath))
+    end
+  )
 end
 
 function M.add_all_virtual_titles(buf)
-  for ln, line in ipairs(api.nvim_buf_get_lines(buf, 0, -1, true)) do
+  for ln, line in ipairs(api.nvim_buf_get_lines(buf, 0, -1, false)) do
     M.add_virtual_title_current_line(buf, ln, line)
   end
 end
@@ -83,31 +89,40 @@ function M.add_virtual_title_current_line(buf, ln, line)
     local start_col, end_col = utils.find_link(line)
     local id = utils.match_link(line)
     if id ~= nil then
-      cmd.query_id(id, M.config.neuron_dir, function(json)
-        if json == nil then
-          return
-        end
+      cmd.query_id(
+        id,
+        M.config.neuron_dir,
+        function(json)
+          -- if json == nil then
+          --   return
+          -- end
 
-        if json.error then
-          return
-        end
+          -- if json.error then
+          --   return
+          -- end
 
-        local title = json.result.zettelTitle
-        -- lua is one indexed
-        -- api.nvim_buf_set_virtual_text(buf, ns, ln - 1, {{title, "TabLineFill"}}, {})
-        api.nvim_buf_set_extmark(buf, ns, ln - 1, start_col - 1, {
-            end_col = end_col,
-            virt_text = {{title, "TabLineFill"}},
-            -- hl_group = "TabLineSel", -- might make neovim slow
-          })
-      end)
+          local title = json.result.Right.zettelTitle
+          -- lua is one indexed
+          -- api.nvim_buf_set_virtual_text(buf, ns, ln - 1, {{title, "TabLineFill"}}, {})
+          api.nvim_buf_set_extmark(
+            buf,
+            ns,
+            ln - 1,
+            start_col - 1,
+            {
+              end_col = end_col,
+              virt_text = {{title, "Comment"}}
+              -- hl_group = "Comment" -- might make neovim slow
+            }
+          )
+        end
+      )
     else
+      -- this also should work
+      -- api.nvim_buf_clear_namespace(buf, ns, ln - 1, ln)
       -- need because the user might do `norm! x` from a valid link
       -- the link then becomes invalid so we need to remove it
       utils.delete_range_extmark(buf, ns, ln - 1, ln) -- minus one to convert from 1 based index to api zero based index
-
-      -- this also should work
-      -- api.nvim_buf_clear_namespace(buf, ns, ln - 1, ln)
     end
   end
 end
@@ -129,18 +144,23 @@ do
     local lines = api.nvim_buf_get_lines(buf, firstline, new_lastline, false)
 
     if #lines == 0 then
-      utils.delete_range_extmark(buf, ns, firstline, new_lastline)
       -- local extmarks = api.nvim_buf_get_extmarks(0, ns, {firstline, 0}, {new_lastline, 0}, {})
       -- for _, v in ipairs(extmarks) do
       --   api.nvim_buf_del_extmark(buf, ns, v[1])
       -- end
+      utils.delete_range_extmark(buf, ns, firstline, new_lastline)
     else
       for i = firstline, new_lastline - 1 do -- minus one because in lua loop range is inclusive
         local async
-        async = uv.new_async(vim.schedule_wrap(function(...)
-          M.add_virtual_title_current_line(...)
-          async:close()
-        end))
+        async =
+          uv.new_async(
+          vim.schedule_wrap(
+            function(...)
+              M.add_virtual_title_current_line(...)
+              async:close()
+            end
+          )
+        )
         async:send(buf, i + 1, lines[i - firstline + 1])
       end
     end
@@ -149,23 +169,32 @@ do
   local task
 
   function M.attach_buffer_fast()
-    api.nvim_buf_attach(0, true, {
-        on_lines = vim.schedule_wrap(function(...)
-          local empty = task == nil
+    api.nvim_buf_attach(
+      0,
+      true,
+      {
+        on_lines = vim.schedule_wrap(
+          function(...)
+            local empty = task == nil
 
-          task = {...}
+            task = {...}
 
-          if empty then
-            vim.defer_fn(function()
-              on_lines(task[2], task[4], task[6])
-              task = nil
-            end, 350)
+            if empty then
+              vim.defer_fn(
+                function()
+                  on_lines(task[2], task[4], task[6])
+                  task = nil
+                end,
+                350
+              )
+            end
           end
-        end),
+        ),
         on_detach = function()
           task = nil
         end
-      })
+      }
+    )
   end
 end
 
@@ -175,7 +204,7 @@ do
     mappings = true, -- to set default mappings
     virtual_titles = true, -- set virtual titles
     run = nil, -- custom code to run
-    leader = "gz", -- the leader key to for all mappings
+    leader = "gz" -- the leader key to for all mappings
   }
 
   local function setup_autocmds()
@@ -188,7 +217,7 @@ do
       vim.cmd(string.format("au BufRead %s lua require'neuron'.attach_buffer_fast()", pattern))
     end
     if M.config.mappings == true then
-      require"neuron/mappings".setup()
+      require "neuron/mappings".setup()
     end
     if M.config.run ~= nil then
       vim.cmd(string.format("au BufRead %s lua require'neuron'.config.run()", pattern))

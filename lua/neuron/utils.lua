@@ -12,28 +12,34 @@ function M.path_from_id(id, neuron_dir, callback)
     args = {"query", "--id", id, "--cached"},
     cwd = neuron_dir,
     on_stderr = M.on_stderr_factory("neuron query --id"),
-    on_stdout = vim.schedule_wrap(function(error, data)
-      assert(not error, error)
+    on_stdout = vim.schedule_wrap(
+      function(error, data)
+        assert(not error, error)
 
-      local path = vim.fn.json_decode(data).result.zettelPath
-      callback(path)
-    end)
+        local path = vim.fn.json_decode(data).result.Right.zettelPath
+        callback(path)
+      end
+    )
   }:start()
 end
 
 function M.on_stderr_factory(name)
-  return vim.schedule_wrap(function(error, data)
-    assert(not error, error)
-    vim.cmd(string.format("echoerr 'An error occured from running %s: %s'", name, data))
-  end)
+  return vim.schedule_wrap(
+    function(error, data)
+      assert(not error, error)
+      vim.cmd(string.format("echoerr 'An error occured from running %s: %s'", name, data))
+    end
+  )
 end
 
 function M.on_exit_factory(name)
-  return vim.schedule_wrap(function(self, code, _signal)
-    if code ~= 0 then
-      error(string.format("The job %s exited with a non-zero code: %s", name, code))
+  return vim.schedule_wrap(
+    function(self, code, _signal)
+      if code ~= 0 then
+        error(string.format("The job %s exited with a non-zero code: %s", name, code))
+      end
     end
-  end)
+  )
 end
 
 function M.feedkeys(string, mode)
@@ -41,7 +47,7 @@ function M.feedkeys(string, mode)
 end
 
 function M.feedraw(s)
-  api.nvim_feedkeys(s, 'n', false)
+  api.nvim_feedkeys(s, "n", false)
 end
 
 local TRIPLE_LINK_RE = "%[%[%[(%w%w%w%w%w%w%w%w)%]%]%]"
@@ -78,12 +84,12 @@ function M.os_open(path)
   Job:new {
     command = open_cmd,
     args = {path},
-    on_stderr = M.on_stderr_factory(open_cmd),
+    on_stderr = M.on_stderr_factory(open_cmd)
   }:start()
 end
 
 function M.get_localhost_address(s)
-  return s:gsub('.+(:%d+)', 'localhost%1')
+  return s:gsub(".+(:%d+)", "http://localhost%1")
 end
 
 function M.get_current_id()
@@ -91,7 +97,7 @@ function M.get_current_id()
 end
 
 function M.start_insert_header()
-  M.feedkeys("Go<CR>#<space>", 'n')
+  M.feedkeys("Go<CR>#<space>", "n")
 end
 
 return M

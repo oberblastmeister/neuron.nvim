@@ -5,16 +5,16 @@ local M = {}
 
 function M.map_buf(key, rhs)
   local lhs = string.format("%s%s", neuron.config.leader, key)
-  api.nvim_buf_set_keymap(0, 'n', lhs, rhs, {noremap = true, silent = true})
+  api.nvim_buf_set_keymap(0, "n", lhs, rhs, {noremap = true, silent = true})
 end
 
 function M.map(key, rhs)
   local lhs = string.format("%s%s", neuron.config.leader, key)
-  api.nvim_set_keymap('n', lhs, rhs, {noremap = true, silent = true})
+  api.nvim_set_keymap("n", lhs, rhs, {noremap = true, silent = true})
 end
 
 function M.set_keymaps()
-  api.nvim_buf_set_keymap(0, 'n', "<CR>", ":lua require'neuron'.enter_link()<CR>", {noremap = true, silent = true})
+  api.nvim_buf_set_keymap(0, "n", "<CR>", ":lua require'neuron'.enter_link()<CR>", {noremap = true, silent = true})
   M.map_buf("<CR>", "<cmd>lua require'neuron'.enter_link()<CR>")
 
   M.map_buf("n", "<cmd>lua require'neuron/cmd'.new_edit(require'neuron'.config.neuron_dir)<CR>")
@@ -35,7 +35,7 @@ end
 
 function M.setup()
   vim.cmd(string.format("au BufRead %s/*.md lua require'neuron/mappings'.set_keymaps()", neuron.config.neuron_dir))
-  M.map('i', "<cmd>lua require'neuron'.goto_index()<CR>")
+  M.map("i", "<cmd>lua require'neuron'.goto_index()<CR>")
 end
 
 return M
