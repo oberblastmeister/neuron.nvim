@@ -62,8 +62,8 @@ end
 
 --- json_fn takes a json table
 function M.json_stdout_wrap(json_fn)
-  return function(e, data)
-    assert(not e, e)
+  return function(error, data)
+    assert(not error, error)
 
     json_fn(vim.fn.json_decode(data))
   end
@@ -94,12 +94,14 @@ function M.new_and_callback(neuron_dir, callback)
     args = {"new"},
     cwd = neuron_dir,
     on_stderr = utils.on_stderr_factory("neuron new"),
-    on_stdout = vim.schedule_wrap(function(error, data)
-      assert(not error, error)
+    on_stdout = vim.schedule_wrap(
+      function(error, data)
+        assert(not error, error)
 
-      callback(data)
-    end),
-    on_exit = utils.on_exit_factory("neuron new"),
+        callback(data)
+      end
+    ),
+    on_exit = utils.on_exit_factory("neuron new")
   }:start()
 end
 return M
