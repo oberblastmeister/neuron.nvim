@@ -9,7 +9,7 @@ function M.neuron(opts)
     command = "neuron",
     args = opts.args,
     cwd = opts.neuron_dir,
-    on_stderr = utils.on_stderr_factory(opts.name or "neuron"),
+    on_stderr = utils.on_stderr_factory(opts.name or "cmd.neuron"),
     on_stdout = vim.schedule_wrap(M.json_stdout_wrap(opts.callback))
   }:start()
 end
@@ -18,12 +18,11 @@ function M.query(arg_opts, neuron_dir, json_fn)
   M.neuron {
     args = M.query_arg_maker(arg_opts),
     neuron_dir = neuron_dir,
-    name = "neuron query",
-    callback = json_fn,
+    name = "cmd.query",
+    callback = json_fn
   }
 end
 
---- 
 function M.query_arg_maker(opts)
   local args = {"query"}
 
@@ -48,12 +47,16 @@ function M.query_arg_maker(opts)
   return args
 end
 
+---@param id string
+---@param neuron_dir string
+---@param json_fn function
 function M.query_id(id, neuron_dir, json_fn)
   M.neuron {
     args = {"query", "--cached", "--id", id},
     neuron_dir = neuron_dir,
-    name = "neuron query --id",
-    callback = json_fn,
+    name = "cmd.query_id",
+    callback = json_fn
+    -- interactive = false
   }
 end
 
