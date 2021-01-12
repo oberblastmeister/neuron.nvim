@@ -74,7 +74,10 @@ function M.enter_link()
     M.config.neuron_dir,
     function(json)
       -- vim.cmd("edit " .. json.result.zettelPath)
-      vim.cmd(string.format("edit %s", json.result.Right.zettelPath))
+      if json.result.Left ~= nil then
+        return
+      end
+      vim.cmd(string.format("edit %s/%s.md", M.config.neuron_dir, json.result.Right.zettelID))
     end
   )
 end
