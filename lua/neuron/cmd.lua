@@ -74,9 +74,11 @@ function M.new_edit(neuron_dir)
     command = "neuron",
     args = {"new"},
     cwd = neuron_dir,
-    on_stderr = utils.on_stderr_factory("neuron new"),
-    on_stdout = vim.schedule_wrap(function(error, data)
-      assert(not error, error)
+    -- on_stderr = utils.on_stderr_factory("neuron new"),
+    interactive = false,
+    on_stdout = vim.schedule_wrap(
+      function(error, data)
+        assert(not error, error)
 
       vim.cmd("edit " .. data)
       utils.start_insert_header()
