@@ -64,7 +64,8 @@ function M.enter_link()
   local id = utils.match_link(word)
 
   if id == nil then
-    error("There is no link under the cursor")
+    vim.cmd("echo 'There is no link under the cursor'")
+    return
   end
 
   cmd.query_id(
