@@ -26,7 +26,8 @@ function M.rib(opts)
     command = "neuron",
     cwd = M.config.neuron_dir,
     args = {"rib", "-w", "-s", opts.address},
-    on_stderr = utils.on_stderr_factory("neuron rib")
+    -- on_stderr = utils.on_stderr_factory("neuron rib"),
+    interactive = false
   }
   NeuronJob.address = opts.address
   NeuronJob:start()
