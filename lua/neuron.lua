@@ -18,7 +18,7 @@ function M.rib(opts)
 
   opts = opts or {}
   opts.address = opts.address or "127.0.0.1:8080"
-  opts.open = opts.open or true
+  -- opts.open = opts.open or true
 
   NeuronJob = {}
   NeuronJob =
