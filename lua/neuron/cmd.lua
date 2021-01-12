@@ -80,10 +80,11 @@ function M.new_edit(neuron_dir)
       function(error, data)
         assert(not error, error)
 
-      vim.cmd("edit " .. data)
-      utils.start_insert_header()
-    end),
-    on_exit = utils.on_exit_factory("neuron new"),
+        vim.cmd("edit " .. data)
+        utils.start_insert_header()
+      end
+    ),
+    on_exit = utils.on_exit_factory("neuron new")
   }:start()
 end
 
