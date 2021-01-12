@@ -40,7 +40,7 @@ function M.query_arg_maker(opts)
     table.insert(args, opts.id)
   end
 
-  if opts.cached == false then
+  if opts.cached ~= false then
     table.insert(args, "--cached")
   end
 
