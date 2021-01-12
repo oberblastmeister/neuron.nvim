@@ -50,11 +50,13 @@ function M.feedraw(s)
   api.nvim_feedkeys(s, "n", false)
 end
 
-local TRIPLE_LINK_RE = "%[%[%[(%w%w%w%w%w%w%w%w)%]%]%]"
-local DOUBLE_LINK_RE = "%[%[(%w%w%w%w%w%w%w%w)%]%]"
+local TRIPLE_LINK_RE = "%[%[%[(%w+)%]%]%]"
+local DOUBLE_LINK_RE = "%[%[(%w+)%]%]"
 
+---@param s string
 function M.match_link(s)
-  return s:match(TRIPLE_LINK_RE) or s:match(DOUBLE_LINK_RE)
+  return string.match(s, TRIPLE_LINK_RE) or string.match(s, DOUBLE_LINK_RE)
+  -- return s:match(TRIPLE_LINK_RE) or s:match(DOUBLE_LINK_RE)
 end
 
 function M.find_link(s)
