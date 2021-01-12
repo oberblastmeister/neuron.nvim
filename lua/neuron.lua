@@ -86,46 +86,45 @@ function M.add_all_virtual_titles(buf)
 end
 
 function M.add_virtual_title_current_line(buf, ln, line)
-  if line ~= nil or line ~= "" then
-    local start_col, end_col = utils.find_link(line)
-    local id = utils.match_link(line)
-    if id ~= nil then
-      cmd.query_id(
-        id,
-        M.config.neuron_dir,
-        function(json)
-          -- if json == nil then
-          --   return
-          -- end
-
-          -- if json.error then
-          --   return
-          -- end
-
-          local title = json.result.Right.zettelTitle
-          -- lua is one indexed
-          -- api.nvim_buf_set_virtual_text(buf, ns, ln - 1, {{title, "TabLineFill"}}, {})
-          api.nvim_buf_set_extmark(
-            buf,
-            ns,
-            ln - 1,
-            start_col - 1,
-            {
-              end_col = end_col,
-              virt_text = {{title, "Comment"}}
-              -- hl_group = "Comment" -- might make neovim slow
-            }
-          )
-        end
-      )
-    else
-      -- this also should work
-      -- api.nvim_buf_clear_namespace(buf, ns, ln - 1, ln)
-      -- need because the user might do `norm! x` from a valid link
-      -- the link then becomes invalid so we need to remove it
-      utils.delete_range_extmark(buf, ns, ln - 1, ln) -- minus one to convert from 1 based index to api zero based index
-    end
+  if type(line) ~= "string" then
+    return
   end
+  local id = utils.match_link(line)
+  if id == nil then
+    return
+  end
+  local start_col, end_col = utils.find_link(line)
+  cmd.query_id(
+    id,
+    M.config.neuron_dir,
+    function(json)
+      if type(json) == "userdata" then
+        return
+      end
+      if json == nil then
+        return
+      end
+      if json.error then
+        return
+      end
+      if json.result.Left ~= nil then
+        utils.delete_range_extmark(buf, ns, ln - 1, ln) -- minus one to convert from 1 based index to api zero based index
+        return
+      end
+      local title = json.result.Right.zettelTitle
+      -- lua is one indexed
+      api.nvim_buf_set_extmark(
+        buf,
+        ns,
+        ln - 1,
+        start_col - 1,
+        {
+          end_col = end_col,
+          virt_text = {{title, "Comment"}}
+        }
+      )
+    end
+  )
 end
 
 function M.update_virtual_titles(buf)
