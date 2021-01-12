@@ -27,7 +27,7 @@ function M.set_keymaps()
 
   M.map_buf("t", "<cmd>lua require'neuron/telescope'.find_tags()<CR>")
 
-  M.map_buf("s", [[<cmd>lua require'neuron'.rib {address = "127.0.0.1:8200", verbose = true}<CR>]])
+  M.map_buf("s", "<cmd>lua require'neuron'.rib()<CR>")
 
   M.map_buf("]", "<cmd>lua require'neuron'.goto_next_extmark()<CR>")
   M.map_buf("[", "<cmd>lua require'neuron'.goto_prev_extmark()<CR>")
