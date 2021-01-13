@@ -4,23 +4,16 @@ local Job = require("plenary/job")
 
 local M = {}
 
----@class NeuronCmd
----@param opts table
----@field args table
----@field neuron_dir string
----@field name string*
-function M:neuron(opts)
+function M.neuron(opts)
   Job:new {
     command = "neuron",
     args = opts.args,
     cwd = opts.neuron_dir,
     on_stderr = utils.on_stderr_factory(opts.name or "cmd.neuron"),
-    on_stdout = vim.schedule_wrap(M.json_stdout_wrap(opts.callback)),
-    interactive = false
+    on_stdout = vim.schedule_wrap(M.json_stdout_wrap(opts.callback))
   }:start()
 end
 
----@param arg_opts table
 function M.query(arg_opts, neuron_dir, json_fn)
   M.neuron {
     args = M.query_arg_maker(arg_opts),
@@ -30,15 +23,8 @@ function M.query(arg_opts, neuron_dir, json_fn)
   }
 end
 
----@param opts table
----@alias opts.id string
 function M.query_arg_maker(opts)
   local args = {"query"}
-
-  if opts.id then
-    table.insert(args, "--id")
-    table.insert(args, opts.id)
-  end
 
   if opts.uri then
     table.insert(args, "--uri")
@@ -54,9 +40,9 @@ function M.query_arg_maker(opts)
     table.insert(args, opts.id)
   end
 
-  -- if opts.cached ~= false then
-  table.insert(args, "--cached")
-  -- end
+  if opts.cached ~= false then
+    table.insert(args, "--cached")
+  end
 
   return args
 end
