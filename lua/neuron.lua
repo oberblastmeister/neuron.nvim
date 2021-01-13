@@ -3,11 +3,11 @@ local uv = vim.loop
 local api = vim.api
 local utils = require("neuron/utils")
 local cmd = require("neuron/cmd")
--- local pickers = require("telescope.pickers")
--- local finders = require("telescope.finders")
--- local previewers = require("telescope.previewers")
--- local conf = require("telescope.config").values
--- local actions = require("telescope.actions")
+local pickers = require("telescope.pickers")
+local finders = require("telescope.finders")
+local previewers = require("telescope.previewers")
+local conf = require("telescope.config").values
+local actions = require("telescope.actions")
 
 local M = {}
 
@@ -46,7 +46,7 @@ function M.rib(opts)
     on_stderr = nil,
     interactive = false
   }
-  -- NeuronJob.address = opts.address
+  NeuronJob.address = opts.address
   NeuronJob:start()
 
   vim.cmd [[augroup NeuronJobStop]]
@@ -86,18 +86,17 @@ function M.enter_link()
     return
   end
 
-  -- cmd.query_id(
-  --   id,
-  --   M.config.neuron_dir,
-  --   function(json)
-  --     -- vim.cmd("edit " .. json.result.zettelPath)
-  --     if json.result.Left ~= nil then
-  --       return
-  --     end
-  --     vim.cmd(string.format("edit %s/%s.md", M.config.neuron_dir, json.result.Right.zettelID))
-  --   end
-  -- )
-  -- cmd.query()
+  cmd.query_id(
+    id,
+    M.config.neuron_dir,
+    function(json)
+      -- vim.cmd("edit " .. json.result.zettelPath)
+      if json.result.Left ~= nil then
+        return
+      end
+      vim.cmd(string.format("edit %s/%s.md", M.config.neuron_dir, json.result.Right.zettelID))
+    end
+  )
 end
 
 function M.add_all_virtual_titles(buf)
@@ -241,7 +240,6 @@ local function setup_autocmds()
     require "neuron/mappings".setup()
   end
   if M.config.run ~= nil then
-    -- assert(type(M.config.run) == "function", "[neuron.setup] - run must be a function")
     vim.cmd(string.format("au BufRead %s lua require'neuron'.config.run()", pathpattern))
   end
   vim.cmd [[augroup END]]
@@ -254,7 +252,7 @@ function M.setup(user_config)
   end
 
   user_config = user_config or {}
-  assert(type(user_config) == "table", "[neuron.setup] - ")
+  -- assert(type(user_config) == "table", "[neuron.setup] - ")
   M.config = vim.tbl_extend("keep", user_config, default_config)
   M.config.neuron_dir = vim.fn.expand(M.config.neuron_dir)
 
