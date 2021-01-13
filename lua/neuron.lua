@@ -1,17 +1,32 @@
 local Job = require("plenary/job")
 local uv = vim.loop
-local pickers = require("telescope.pickers")
 local api = vim.api
-local finders = require("telescope.finders")
-local previewers = require("telescope.previewers")
-local conf = require("telescope.config").values
-local actions = require("telescope.actions")
 local utils = require("neuron/utils")
 local cmd = require("neuron/cmd")
+-- local pickers = require("telescope.pickers")
+-- local finders = require("telescope.finders")
+-- local previewers = require("telescope.previewers")
+-- local conf = require("telescope.config").values
+-- local actions = require("telescope.actions")
 
 local M = {}
 
 local ns
+
+--- Generate a new cache on write
+---@return type
+function M.gen_cache_on_write()
+  local job =
+    Job:new {
+    command = "neuron",
+    name = "neuron.gen_cache_on_write",
+    args = {"gen"},
+    cwd = M.config.neuron_dir,
+    interactive = false
+    -- enable_recording = true
+  }
+  job:start()
+end
 
 function M.rib(opts)
   assert(not NeuronJob, "you already started a neuron server")
@@ -26,10 +41,12 @@ function M.rib(opts)
     command = "neuron",
     cwd = M.config.neuron_dir,
     args = {"rib", "-w", "-s", opts.address},
+    name = "neuron.rib",
     -- on_stderr = utils.on_stderr_factory("neuron rib"),
+    on_stderr = nil,
     interactive = false
   }
-  NeuronJob.address = opts.address
+  -- NeuronJob.address = opts.address
   NeuronJob:start()
 
   vim.cmd [[augroup NeuronJobStop]]
@@ -69,17 +86,18 @@ function M.enter_link()
     return
   end
 
-  cmd.query_id(
-    id,
-    M.config.neuron_dir,
-    function(json)
-      -- vim.cmd("edit " .. json.result.zettelPath)
-      if json.result.Left ~= nil then
-        return
-      end
-      vim.cmd(string.format("edit %s/%s.md", M.config.neuron_dir, json.result.Right.zettelID))
-    end
-  )
+  -- cmd.query_id(
+  --   id,
+  --   M.config.neuron_dir,
+  --   function(json)
+  --     -- vim.cmd("edit " .. json.result.zettelPath)
+  --     if json.result.Left ~= nil then
+  --       return
+  --     end
+  --     vim.cmd(string.format("edit %s/%s.md", M.config.neuron_dir, json.result.Right.zettelID))
+  --   end
+  -- )
+  -- cmd.query()
 end
 
 function M.add_all_virtual_titles(buf)
@@ -135,7 +153,9 @@ function M.update_virtual_titles(buf)
   M.add_all_virtual_titles()
 end
 
-do
+-- do
+
+function M.attach_buffer_fast()
   local function on_lines(buf, firstline, new_lastline)
     -- -- local params = {...}
     -- local buf = params[2]
@@ -170,78 +190,80 @@ do
   end
 
   local task
+  api.nvim_buf_attach(
+    0,
+    true,
+    {
+      on_lines = vim.schedule_wrap(
+        function(...)
+          local empty = task == nil
 
-  function M.attach_buffer_fast()
-    api.nvim_buf_attach(
-      0,
-      true,
-      {
-        on_lines = vim.schedule_wrap(
-          function(...)
-            local empty = task == nil
+          task = {...}
 
-            task = {...}
-
-            if empty then
-              vim.defer_fn(
-                function()
-                  on_lines(task[2], task[4], task[6])
-                  task = nil
-                end,
-                350
-              )
-            end
+          if empty then
+            vim.defer_fn(
+              function()
+                on_lines(task[2], task[4], task[6])
+                task = nil
+              end,
+              350
+            )
           end
-        ),
-        on_detach = function()
-          task = nil
         end
-      }
-    )
+      ),
+      on_detach = function()
+        task = nil
+      end
+    }
+  )
+end
+-- end
+
+-- do
+local default_config = {
+  neuron_dir = "~/neuron",
+  mappings = true, -- to set default mappings
+  virtual_titles = true, -- set virtual titles
+  run = nil, -- custom code to run
+  leader = "gz" -- the leader key to for all mappings
+}
+
+local function setup_autocmds()
+  local pathpattern = string.format("%s/*.md", M.config.neuron_dir)
+  vim.cmd [[augroup Neuron]]
+  vim.cmd [[au!]]
+  vim.cmd(string.format("au BufWritePost %s lua require'neuron'.gen_cache_on_write()", pathpattern))
+  if M.config.virtual_titles == true then
+    vim.cmd(string.format("au BufEnter %s lua require'neuron'.add_all_virtual_titles()", pathpattern))
+    vim.cmd(string.format("au BufRead %s lua require'neuron'.attach_buffer_fast()", pathpattern))
   end
+  if M.config.mappings == true then
+    require "neuron/mappings".setup()
+  end
+  if M.config.run ~= nil then
+    -- assert(type(M.config.run) == "function", "[neuron.setup] - run must be a function")
+    vim.cmd(string.format("au BufRead %s lua require'neuron'.config.run()", pathpattern))
+  end
+  vim.cmd [[augroup END]]
 end
 
-do
-  local default_config = {
-    neuron_dir = "~/neuron",
-    mappings = true, -- to set default mappings
-    virtual_titles = true, -- set virtual titles
-    run = nil, -- custom code to run
-    leader = "gz" -- the leader key to for all mappings
-  }
-
-  local function setup_autocmds()
-    local pattern = string.format("%s/*.md", M.config.neuron_dir)
-
-    vim.cmd [[augroup Neuron]]
-    vim.cmd [[au!]]
-    if M.config.virtual_titles == true then
-      vim.cmd(string.format("au BufRead %s lua require'neuron'.add_all_virtual_titles()", pattern))
-      vim.cmd(string.format("au BufRead %s lua require'neuron'.attach_buffer_fast()", pattern))
-    end
-    if M.config.mappings == true then
-      require "neuron/mappings".setup()
-    end
-    if M.config.run ~= nil then
-      vim.cmd(string.format("au BufRead %s lua require'neuron'.config.run()", pattern))
-    end
-    vim.cmd [[augroup END]]
+---@param user_config table
+function M.setup(user_config)
+  if vim.fn.executable("neuron") == 0 then
+    error("neuron is not executable")
   end
 
-  function M.setup(user_config)
-    if vim.fn.executable("neuron") == 0 then
-      error("neuron is not executable")
-    end
+  user_config = user_config or {}
+  assert(type(user_config) == "table", "[neuron.setup] - ")
+  M.config = vim.tbl_extend("keep", user_config, default_config)
+  M.config.neuron_dir = vim.fn.expand(M.config.neuron_dir)
 
-    user_config = user_config or {}
-    M.config = vim.tbl_extend("keep", user_config, default_config)
-    M.config.neuron_dir = vim.fn.expand(M.config.neuron_dir)
+  ns = api.nvim_create_namespace("neuron.nvim")
 
-    ns = api.nvim_create_namespace("neuron.nvim")
-
-    setup_autocmds()
-  end
+  setup_autocmds()
 end
+
+-- local tuple = {}
 
 function M.goto_next_link()
   local tuple = M.next_link_idx()
