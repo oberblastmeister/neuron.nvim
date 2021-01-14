@@ -1,8 +1,8 @@
-local neuron = require("neuron")
+local config = require("neuron/config")
 local M = {}
 
 function M.gen_from_zettels(entry)
-  local value = string.format("%s/%s", neuron.config.neuron_dir, entry.zettelPath)
+  local value = string.format("%s/%s", config.neuron_dir, entry.zettelPath)
   local display = entry.zettelTitle
   return {
     display = display,

@@ -2,6 +2,7 @@ local Job = require("plenary/job")
 local uv = vim.loop
 local api = vim.api
 local utils = require("neuron/utils")
+local config = require("neuron/config")
 local cmd = require("neuron/cmd")
 
 local M = {}
@@ -19,7 +20,7 @@ function M.rib(opts)
   NeuronJob =
     Job:new {
     command = "neuron",
-    cwd = M.config.neuron_dir,
+    cwd = config.neuron_dir,
     args = {"rib", "-w", "-s", opts.address},
     name = "neuron.rib",
     on_stderr = nil,
@@ -67,13 +68,13 @@ function M.enter_link()
 
   cmd.query_id(
     id,
-    M.config.neuron_dir,
+    config.neuron_dir,
     function(json)
       -- vim.cmd("edit " .. json.result.zettelPath)
       if json.result.Left ~= nil then
         return
       end
-      vim.cmd(string.format("edit %s/%s.md", M.config.neuron_dir, json.result.Right.zettelID))
+      vim.cmd(string.format("edit %s/%s.md", config.neuron_dir, json.result.Right.zettelID))
     end
   )
 end
@@ -95,7 +96,7 @@ function M.add_virtual_title_current_line(buf, ln, line)
   local start_col, end_col = utils.find_link(line)
   cmd.query_id(
     id,
-    M.config.neuron_dir,
+    config.neuron_dir,
     function(json)
       if type(json) == "userdata" then
         return
@@ -195,30 +196,21 @@ function M.attach_buffer_fast()
   )
 end
 
-local default_config = {
-  neuron_dir = "~/neuron",
-  gen_cache_on_write = true,
-  mappings = true, -- to set default mappings
-  virtual_titles = true, -- set virtual titles
-  run = nil, -- custom code to run
-  leader = "gz" -- the leader key to for all mappings
-}
-
 local function setup_autocmds()
-  local pathpattern = string.format("%s/*.md", M.config.neuron_dir)
+  local pathpattern = string.format("%s/*.md", config.neuron_dir)
   vim.cmd [[augroup Neuron]]
   vim.cmd [[au!]]
-  if M.config.gen_cache_on_write == true then
+  if config.gen_cache_on_write == true then
     vim.cmd(string.format("au BufWritePost %s lua require'neuron/cmd'.gen(require'neuron'.config.neuron_dir)", pathpattern))
   end
-  if M.config.virtual_titles == true then
+  if config.virtual_titles == true then
     vim.cmd(string.format("au BufRead %s lua require'neuron'.add_all_virtual_titles()", pathpattern))
     vim.cmd(string.format("au BufRead %s lua require'neuron'.attach_buffer_fast()", pathpattern))
   end
-  if M.config.mappings == true then
+  if config.mappings == true then
     require "neuron/mappings".setup()
   end
-  if M.config.run ~= nil then
+  if config.run ~= nil then
     vim.cmd(string.format("au BufRead %s lua require'neuron'.config.run()", pathpattern))
   end
   vim.cmd [[augroup END]]
@@ -231,16 +223,13 @@ function M.setup(user_config)
   end
 
   user_config = user_config or {}
-  -- assert(type(user_config) == "table", "[neuron.setup] - ")
-  M.config = vim.tbl_extend("keep", user_config, default_config)
-  M.config.neuron_dir = vim.fn.expand(M.config.neuron_dir)
+
+  config:setup(user_config)
 
   ns = api.nvim_create_namespace("neuron.nvim")
 
   setup_autocmds()
 end
-
--- local tuple = {}
 
 function M.goto_next_link()
   local tuple = M.next_link_idx()
@@ -280,7 +269,7 @@ function M.goto_prev_extmark()
 end
 
 function M.goto_index()
-  vim.cmd(string.format("edit %s/index.md", M.config.neuron_dir))
+  vim.cmd(string.format("edit %s/index.md", config.neuron_dir))
 end
 
 return M

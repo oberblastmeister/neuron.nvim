@@ -9,6 +9,7 @@ local cmd = require("neuron/cmd")
 local neuron = require("neuron")
 local neuron_actions = require("neuron/telescope/actions")
 local neuron_entry = require("neuron/telescope/make_entry")
+local config = require("neuron/config")
 
 local M = {}
 
@@ -19,7 +20,7 @@ function M.find_zettels(opts)
     {
       cached = opts.cached
     },
-    neuron.config.neuron_dir,
+    config.neuron_dir,
     function(json)
       local picker_opts = {
         prompt_title = "Find Zettels",
@@ -58,7 +59,7 @@ function M.find_backlinks(opts)
       id = opts.id or utils.get_current_id(),
       cached = opts.cached
     },
-    neuron.config.neuron_dir,
+    config.neuron_dir,
     function(json)
       local picker_opts = {
         prompt_title = "Find Backlinks",
@@ -87,7 +88,7 @@ function M.find_tags(opts)
 
   cmd.query(
     {uri = "z:tags"},
-    neuron.config.neuron_dir,
+    config.neuron_dir,
     function(json)
       local picker_opts = {
         prompt_title = "Find Tags",

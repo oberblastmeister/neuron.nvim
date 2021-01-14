@@ -1,5 +1,5 @@
 local api = vim.api
-local neuron = require("neuron")
+local config = require("neuron/config")
 local cmd = require("neuron/cmd")
 local utils = require("neuron/utils")
 local actions = require('telescope.actions')
@@ -23,7 +23,7 @@ function M.edit_or_insert(prompt_bufnr)
     vim.cmd("edit " .. entry.value)
   else
     local current_line = actions.get_current_line() -- todo, need pr telescope for this
-    cmd.new_and_callback(neuron.config.neuron_dir, function(data)
+    cmd.new_and_callback(config.neuron_dir, function(data)
       vim.cmd("edit " .. data)
       utils.start_insert_header()
       utils.feedraw(current_line)
