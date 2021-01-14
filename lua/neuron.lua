@@ -133,7 +133,6 @@ function M.add_virtual_title_current_line(buf, ln, line)
       end
       local title = json.result.Right.zettelTitle
       -- lua is one indexed
-      print('settings extmark at', ln, start_col)
       api.nvim_buf_set_extmark(
         buf,
         ns,

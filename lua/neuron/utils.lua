@@ -27,7 +27,9 @@ function M.on_stderr_factory(name)
   return vim.schedule_wrap(
     function(error, data)
       assert(not error, error)
-      vim.cmd(string.format("echoerr 'An error occured from running %s: %s'", name, data))
+      if data ~= nil then
+        vim.cmd(string.format("echoerr 'An error occured from running %s: %s'", name, data))
+      end
     end
   )
 end
