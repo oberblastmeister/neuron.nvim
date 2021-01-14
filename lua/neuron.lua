@@ -151,7 +151,7 @@ local function setup_autocmds()
   end
   if config.mappings == true then require"neuron/mappings".setup() end
   if config.run ~= nil then
-    vim.cmd(string.format("au BufRead %s lua require'neuron'.config.run()",
+    vim.cmd(string.format("au BufRead %s lua require'neuron/config'.run()",
       pathpattern))
   end
   vim.cmd [[augroup END]]
@@ -163,7 +163,7 @@ function M.setup(user_config)
 
   user_config = user_config or {}
 
-  config:setup(user_config)
+  -- config:setup(user_config)
 
   ns = api.nvim_create_namespace("neuron.nvim")
 
