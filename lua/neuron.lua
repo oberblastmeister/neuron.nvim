@@ -139,9 +139,9 @@ local function setup_autocmds()
   vim.cmd [[augroup Neuron]]
   vim.cmd [[au!]]
   if config.gen_cache_on_write == true then
-    -- vim.cmd(string.format(
-    --   "au BufWritePost %s lua require'neuron/cmd'.gen(require'neuron'.config.neuron_dir)",
-    --   pathpattern))
+    vim.cmd(string.format(
+      "au BufWritePost %s lua require'neuron/cmd'.gen(require'neuron/config'.neuron_dir)",
+      pathpattern))
   end
   if config.virtual_titles == true then
     vim.cmd(string.format(
