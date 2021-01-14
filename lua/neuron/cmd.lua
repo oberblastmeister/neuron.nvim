@@ -122,4 +122,15 @@ function M.new_and_callback(neuron_dir, callback)
     on_exit = utils.on_exit_factory("neuron new")
   }:start()
 end
+
+function M.gen(neuron_dir)
+  Job:new {
+    command = "neuron",
+    name = "neuron.gen_cache_on_write",
+    args = {"gen"},
+    cwd = neuron_dir,
+    interactive = false
+  }:start()
+end
+
 return M

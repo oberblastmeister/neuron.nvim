@@ -13,26 +13,11 @@ local M = {}
 
 local ns
 
---- Generate a new cache on write
----@return type
-function M.gen_cache_on_write()
-  local job =
-    Job:new {
-    command = "neuron",
-    name = "neuron.gen_cache_on_write",
-    args = {"gen"},
-    cwd = M.config.neuron_dir,
-    interactive = false
-    -- enable_recording = true
-  }
-  job:start()
-end
-
 function M.rib(opts)
   assert(not NeuronJob, "you already started a neuron server")
 
   opts = opts or {}
-  opts.address = opts.address or "127.0.0.1:8080"
+  opts.address = opts.address or "127.0.0.1:8200"
   -- opts.open = opts.open or true
 
   NeuronJob = {}
@@ -152,8 +137,6 @@ function M.update_virtual_titles(buf)
   M.add_all_virtual_titles()
 end
 
--- do
-
 function M.attach_buffer_fast()
   local function on_lines(buf, firstline, new_lastline)
     -- -- local params = {...}
@@ -217,11 +200,10 @@ function M.attach_buffer_fast()
     }
   )
 end
--- end
 
--- do
 local default_config = {
   neuron_dir = "~/neuron",
+  gen_cache_on_write = true,
   mappings = true, -- to set default mappings
   virtual_titles = true, -- set virtual titles
   run = nil, -- custom code to run
@@ -232,7 +214,9 @@ local function setup_autocmds()
   local pathpattern = string.format("%s/*.md", M.config.neuron_dir)
   vim.cmd [[augroup Neuron]]
   vim.cmd [[au!]]
-  vim.cmd(string.format("au BufWritePost %s lua require'neuron'.gen_cache_on_write()", pathpattern))
+  if M.config.gen_cache_on_write == true then
+    vim.cmd(string.format("au BufWritePost %s lua require'neuron/cmd'.gen(require'neuron'.config.neuron_dir)", pathpattern))
+  end
   if M.config.virtual_titles == true then
     vim.cmd(string.format("au BufRead %s lua require'neuron'.add_all_virtual_titles()", pathpattern))
     vim.cmd(string.format("au BufRead %s lua require'neuron'.attach_buffer_fast()", pathpattern))
