@@ -133,6 +133,7 @@ function M.add_virtual_title_current_line(buf, ln, line)
       end
       local title = json.result.Right.zettelTitle
       -- lua is one indexed
+      print('settings extmark at', ln, start_col)
       api.nvim_buf_set_extmark(
         buf,
         ns,
@@ -173,17 +174,18 @@ function M.attach_buffer_fast()
       utils.delete_range_extmark(buf, ns, firstline, new_lastline)
     else
       for i = firstline, new_lastline - 1 do -- minus one because in lua loop range is inclusive
-        local async
-        async =
-          uv.new_async(
-          vim.schedule_wrap(
-            function(...)
-              M.add_virtual_title_current_line(...)
-              async:close()
-            end
-          )
-        )
-        async:send(buf, i + 1, lines[i - firstline + 1])
+        -- local async
+        -- async =
+        --   uv.new_async(
+        --   vim.schedule_wrap(
+        --     function(...)
+        --       M.add_virtual_title_current_line(...)
+        --       async:close()
+        --     end
+        --   )
+        -- )
+        M.add_virtual_title_current_line(buf, i + 1, lines[i - firstline + 1])
+        -- async:send(buf, i + 1, lines[i - firstline + 1])
       end
     end
   end
@@ -233,7 +235,7 @@ local function setup_autocmds()
   vim.cmd [[au!]]
   vim.cmd(string.format("au BufWritePost %s lua require'neuron'.gen_cache_on_write()", pathpattern))
   if M.config.virtual_titles == true then
-    vim.cmd(string.format("au BufEnter %s lua require'neuron'.add_all_virtual_titles()", pathpattern))
+    vim.cmd(string.format("au BufRead %s lua require'neuron'.add_all_virtual_titles()", pathpattern))
     vim.cmd(string.format("au BufRead %s lua require'neuron'.attach_buffer_fast()", pathpattern))
   end
   if M.config.mappings == true then
