@@ -33,7 +33,7 @@ function Config:setup(user_config)
 end
 
 return setmetatable({
-  neuron_dir = "~/neuron",
+  neuron_dir = vim.fn.expand("~/neuron"),
   mappings = true, -- to set default mappings
   virtual_titles = true, -- set virtual titles
   run = function() end, -- custom code to run

@@ -2,7 +2,11 @@ local config = require("neuron/config")
 local M = {}
 
 function M.gen_from_zettels(entry)
+  if vim.startswith(entry.zettelPath, './') then
+    entry.zettelPath = entry.zettelPath:sub(3)
+  end
   local value = string.format("%s/%s", config.neuron_dir, entry.zettelPath)
+
   local display = entry.zettelTitle
   return {
     display = display,
