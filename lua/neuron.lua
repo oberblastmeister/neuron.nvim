@@ -14,7 +14,6 @@ function M.rib(opts)
 
   opts = opts or {}
   opts.address = opts.address or "127.0.0.1:8200"
-  -- opts.open = opts.open or true
 
   NeuronJob = {}
   NeuronJob =
@@ -134,35 +133,13 @@ end
 
 function M.attach_buffer_fast()
   local function on_lines(buf, firstline, new_lastline)
-    -- -- local params = {...}
-    -- local buf = params[2]
-    -- -- local changedtick = params[3]
-    -- local firstline = params[4]
-    -- -- local lastline = params[5]
-    -- local new_lastline = params[6]
-
     local lines = api.nvim_buf_get_lines(buf, firstline, new_lastline, false)
 
     if #lines == 0 then
-      -- local extmarks = api.nvim_buf_get_extmarks(0, ns, {firstline, 0}, {new_lastline, 0}, {})
-      -- for _, v in ipairs(extmarks) do
-      --   api.nvim_buf_del_extmark(buf, ns, v[1])
-      -- end
       utils.delete_range_extmark(buf, ns, firstline, new_lastline)
     else
       for i = firstline, new_lastline - 1 do -- minus one because in lua loop range is inclusive
-        -- local async
-        -- async =
-        --   uv.new_async(
-        --   vim.schedule_wrap(
-        --     function(...)
-        --       M.add_virtual_title_current_line(...)
-        --       async:close()
-        --     end
-        --   )
-        -- )
         M.add_virtual_title_current_line(buf, i + 1, lines[i - firstline + 1])
-        -- async:send(buf, i + 1, lines[i - firstline + 1])
       end
     end
   end
