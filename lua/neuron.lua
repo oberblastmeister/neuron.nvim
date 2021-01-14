@@ -3,11 +3,6 @@ local uv = vim.loop
 local api = vim.api
 local utils = require("neuron/utils")
 local cmd = require("neuron/cmd")
-local pickers = require("telescope.pickers")
-local finders = require("telescope.finders")
-local previewers = require("telescope.previewers")
-local conf = require("telescope.config").values
-local actions = require("telescope.actions")
 
 local M = {}
 
@@ -27,7 +22,6 @@ function M.rib(opts)
     cwd = M.config.neuron_dir,
     args = {"rib", "-w", "-s", opts.address},
     name = "neuron.rib",
-    -- on_stderr = utils.on_stderr_factory("neuron rib"),
     on_stderr = nil,
     interactive = false
   }
