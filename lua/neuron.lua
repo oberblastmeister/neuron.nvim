@@ -120,7 +120,7 @@ function M.add_virtual_title_current_line(buf, ln, line)
         start_col - 1,
         {
           end_col = end_col,
-          virt_text = {{title, "Comment"}}
+          virt_text = {{title, config.virt_text_highlight}}
         }
       )
     end

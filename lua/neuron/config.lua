@@ -9,7 +9,10 @@ function Config:validate()
     virtual_titles = {self.virtual_titles, 'boolean'},
     run = {self.run, 'function'},
     leader = {self.leader, 'string'},
+    gen_cache_on_write = {self.gen_cache_on_write, 'boolean'},
+    virt_text_highlight = {self.virt_text_highlight, 'string'},
   }
+
   if not Path:new(self.path):exists() then
     error(string.format("The path supplied for the neuron_dir does not exist"))
   end
@@ -35,4 +38,6 @@ return setmetatable({
   virtual_titles = true, -- set virtual titles
   run = function() end, -- custom code to run
   leader = "gz", -- the leader key to for all mappings
+  gen_cache_on_write = true,
+  virt_text_highlight = "Comment",
 }, Config)
