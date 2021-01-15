@@ -27,6 +27,6 @@ jobs:
           sudo apt-get update
           sudo apt-get install neovim
       - name: Install plugins
-          git clone --depth 1 https://github.com/nvim-lua/plenary.nvim ~/.local/share/nvim/site/pack/vendor/start/plenary.nvim
+        run: git clone --depth 1 https://github.com/nvim-lua/plenary.nvim ~/.local/share/nvim/site/pack/vendor/start/plenary.nvim
       - name: Test
         run: make test
