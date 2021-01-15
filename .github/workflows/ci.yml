@@ -10,13 +10,13 @@ jobs:
       - uses: actions/checkout@v2
       - name: Install Luacheck
         run: |
-          sudo apt-get update
+          sudo apt-get update && sudo apt-get upgrade
           sudo apt-get install luarocks
           sudo luarocks install luacheck
       - name: Lint
         run: make lint
   test:
-    name: plenary test
+    name: Plenary Test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
