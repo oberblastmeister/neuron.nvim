@@ -14,7 +14,7 @@ jobs:
           sudo apt-get install luarocks
           sudo luarocks install luacheck
       - name: Lint
-        run: make lint
+        run: sudo make lint
   test:
     name: Plenary Test
     runs-on: ubuntu-latest
@@ -29,4 +29,4 @@ jobs:
       - name: Install plugins
         run: git clone --depth 1 https://github.com/nvim-lua/plenary.nvim ~/.local/share/nvim/site/pack/vendor/start/plenary.nvim
       - name: Test
-        run: make test
+        run: sudo make test
