@@ -1,4 +1,3 @@
-local api = vim.api
 local utils = require("neuron/utils")
 local Job = require("plenary/job")
 
@@ -12,11 +11,6 @@ function M.neuron(opts)
     cwd = opts.neuron_dir,
     on_stderr = utils.on_stderr_factory(opts.name or "cmd.neuron"),
     on_stdout = vim.schedule_wrap(M.json_stdout_wrap(opts.callback)),
-    -- on_stdout = function()
-    --   if opts.callback then
-    --     vim.schedule_wrap(M.json_stdout_wrap(opts.callback))
-    --   end
-    -- end,
     interactive = false
   }:start()
 end

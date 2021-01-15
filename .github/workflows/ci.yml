@@ -1,0 +1,32 @@
+name: ci
+
+on: [push, pull_request]
+
+jobs:
+  lint:
+    name: Luacheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install Luacheck
+        run: |
+          sudo apt-get update
+          sudo apt-get install luarocks
+          sudo luarocks install luacheck
+      - name: Lint
+        run: make lint
+  test:
+    name: plenary test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install Neovim
+        run: |
+          sudo apt-get install software-properties-common
+          sudo add-apt-repository ppa:neovim-ppa/stable
+          sudo apt-get update
+          sudo apt-get install neovim
+      - name: Install plugins
+          git clone --depth 1 https://github.com/nvim-lua/plenary.nvim ~/.local/share/nvim/site/pack/vendor/start/plenary.nvim
+      - name: Test
+        run: make test

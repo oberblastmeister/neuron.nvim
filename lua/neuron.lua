@@ -8,6 +8,7 @@ local cmd = require("neuron/cmd")
 local M = {}
 
 local ns
+NeuronJob = {}
 
 function M.rib(opts)
   assert(not NeuronJob, "you already started a neuron server")
@@ -15,8 +16,7 @@ function M.rib(opts)
   opts = opts or {}
   opts.address = opts.address or "127.0.0.1:8200"
 
-  NeuronJob = {}
-  NeuronJob = Job:new{
+  NeuronJob = Job:new {
     command = "neuron",
     cwd = config.neuron_dir,
     args = {"rib", "-w", "-s", opts.address},
@@ -46,9 +46,7 @@ function M.stop()
   end
 end
 
-function M.open_from_server(opts)
-  opts = opts or {}
-
+function M.open_from_server()
   utils.os_open(utils.get_localhost_address(NeuronJob.address))
 end
 
@@ -163,7 +161,7 @@ function M.setup(user_config)
 
   user_config = user_config or {}
 
-  -- config:setup(user_config)
+  config:setup(user_config)
 
   ns = api.nvim_create_namespace("neuron.nvim")
 

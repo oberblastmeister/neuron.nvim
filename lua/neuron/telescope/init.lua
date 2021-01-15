@@ -6,7 +6,6 @@ local conf = require("telescope.config").values
 local actions = require("telescope.actions")
 local utils = require("neuron/utils")
 local cmd = require("neuron/cmd")
-local neuron = require("neuron")
 local neuron_actions = require("neuron/telescope/actions")
 local neuron_entry = require("neuron/telescope/make_entry")
 local config = require("neuron/config")

@@ -1,6 +1,5 @@
 local api = vim.api
 local config = require("neuron/config")
-local neuron = require("neuron")
 
 local M = {}
 
