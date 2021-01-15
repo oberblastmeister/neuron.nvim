@@ -3,13 +3,13 @@ align_parameter: true
 align_table_field: true
 break_after_functioncall_lp: false
 break_after_functiondef_lp: false
-break_after_operator: false 
+break_after_operator: true
 break_after_table_lb: true
-break_before_functioncall_rp: true
-break_before_functiondef_rp: true
+break_before_functioncall_rp: false
+break_before_functiondef_rp: false
 break_before_table_rb: true
 chop_down_kv_table: true
-chop_down_parameter: true
+chop_down_parameter: false
 chop_down_table: false
 column_limit: 100
 column_table_limit: 100
@@ -22,5 +22,5 @@ keep_simple_function_one_line: true
 single_quote_to_double_quote: false
 spaces_before_call: 1
 tab_width: 2
-table_sep: ','
+table_sep: ","
 use_tab: false
