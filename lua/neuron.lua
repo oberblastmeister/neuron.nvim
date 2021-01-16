@@ -8,7 +8,6 @@ local cmd = require("neuron/cmd")
 local M = {}
 
 local ns
-NeuronJob = {}
 
 function M.rib(opts)
   assert(not NeuronJob, "you already started a neuron server")
