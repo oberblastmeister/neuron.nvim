@@ -61,6 +61,50 @@ function M.find_link(s)
   return s:find(TRIPLE_LINK_RE) or s:find(DOUBLE_LINK_RE)
 end
 
+function M.open_or_create()
+  if M.get_link() then
+    M.open()
+  else
+    M.create_link()
+  end
+end
+
+function M.get_link()
+  line = vim.api.nvim_get_current_line()
+  local x = vim.api.nvim_win_get_cursor(0)[2] + 1
+
+  for v in M.scanner(line) do
+    if x >= v.start and x <= v.finish then
+      return v
+    end
+  end
+end
+
+function M.open()
+  local link = M.get_link()
+  if not link then
+    return
+  end
+
+  local buf_zetteldid = M.get_current_id()
+  local link_id = link["zettelID"]
+
+  print(vim.inspect(buf_zetteldid))
+  print(vim.inspect(link_id))
+  -- local path = config.path:joinpath(link['link']):expand()
+  -- local is_new = not Path:new(path):exists()
+
+  -- if is_new then vim.cmd('write') end
+  -- vim.cmd('e ' .. path)
+  -- vim.api.nvim_set_current_dir(config.path:expand())
+
+  -- if is_new and vim.api.nvim_buf_line_count(0) == 1 then
+  --   vim.api.nvim_buf_set_lines(0, 1, 1, false, {
+  --     '', ("[%s](%s)"):format(link_to_name(current_file), current_file)
+  --   })
+  -- end
+end
+
 function M.get_cword()
   -- (1,0)-indexed (row, col) tuple cursor position in window 0 (current window)
   local pos = vim.api.nvim_win_get_cursor(0)
@@ -78,7 +122,6 @@ function M.get_cword()
 end
 
 -- Creates a link
--- visual)
 function M.create_link(visual)
   local word
 
@@ -92,23 +135,13 @@ function M.create_link(visual)
     return
   end
 
-  print(string.format("found: %s", vim.inspect(word)))
+  -- print(string.format("found: %s", vim.inspect(word)))
 
   local line = api.nvim_get_current_line()
   -- -- local file_name =
 end
 
-function M.get_link()
-  line = vim.api.nvim_get_current_line()
-  local x = vim.api.nvim_win_get_cursor(0)[2] + 1
-
-  for v in M.scanner(line) do
-    if x >= v.start and x <= v.finish then
-      return v
-    end
-  end
-end
-
+-- allowed chars in zettelID
 -- https://github.com/srid/neuron/blob/8d9bc7341422a2346d8fd6dc35624723c6525f40/neuron/src/lib/Neuron/Zettelkasten/ID.hs#L83
 local allowed_chars = {
   "_",
@@ -132,6 +165,7 @@ function M.scanner(line)
   return function()
     while true do
       -- TODO: Is the "%b[]" enough? <20-01-21, Frands Otting> --
+      -- It'll find links like [[[[[index]] because finds matching brackets
       local start, finish = line:find("%b[]", pos)
 
       if not start then
@@ -145,7 +179,7 @@ function M.scanner(line)
       -- TODO: Check for allowed_chars see above ^^^ Frands --
       return {
         str = str,
-        zettelID = str:match("%[(.-[^%[%]]+)%]"),
+        zettelID = str:match("%[([^%[%]]-)%]"),
         start = start,
         finish = finish,
       }
@@ -153,7 +187,7 @@ function M.scanner(line)
   end
 end
 
-local function msub(line, s, f)
+local function subs(line, s, f)
   return line:sub(s, f) .. vim.fn.strcharpart(line:sub(f + 1), 0, 1)
 end
 
@@ -166,10 +200,10 @@ function M.get_visual()
              [[echo "Selection spans multiple lines - Only single line links allowed"]])
   end
 
-  local str = msub(vim.api.nvim_get_current_line(), s[3], f[3] - 1)
+  local str = subs(vim.api.nvim_get_current_line(), s[3], f[3] - 1)
   local start = s[3] - 1
   local finish = start + str:len()
-
+  print(vim.inspect({str = str, start = start, finish = finish}))
   return {str = str, start = start, finish = finish}
 end
 
