@@ -76,7 +76,8 @@ function M.get_link()
 
   for v in M.scanner(line) do
     if x >= v.start and x <= v.finish then
-      return v
+      print(v)
+      -- return v
     end
   end
 end
@@ -87,7 +88,7 @@ function M.open()
     return
   end
 
-  local current_id = M.get_current_id()
+  local current = M.get_current_id()
   local link_id = link["zettelID"]
 
   print(vim.inspect(current_id))
@@ -135,12 +136,12 @@ end
 -- https://github.com/srid/neuron/blob/8d9bc7341422a2346d8fd6dc35624723c6525f40/neuron/src/lib/Neuron/Zettelkasten/ID.hs#L83
 -- local allowed_chars = { "_", "-", ".", -- Whitespace is essential for title IDs -- This gets replaced with underscore in ID slug " ", -- Allow some puctuation letters that are common in note titles ",", ";", "(", ")", ":", "\"", "'", }
 
-function M.scanner(line, pos)
-  pos = pos or 1
+function M.scanner(line)
+  pos = 1
+  -- pos = pos or 1
   return function()
     while true do
-      -- It'll find links like [[[[[index]] because finds matching brackets
-      -- TODO: Returns a link twice --
+      -- TODO: How can this be improved <21-01-21> --
       local start, finish = line:find("%[+[^%[%]]-%]+", pos)
 
       if not start then
@@ -149,32 +150,33 @@ function M.scanner(line, pos)
 
       str = line:sub(start, finish)
 
-      local valid_link = M.valid_link(str)
+      link_is = M.link_validator(str, start, finish)
 
-      pos = finish + 1
+      -- pos = finish + 1
 
       return {
         full_str = str,
         inside_str = str:match("%[([^%[%]]-)%]"),
         start = start,
         finish = finish,
+        balanced = link_is.balanced,
       }
     end
   end
 end
 
-function M.valid_link(str, start, finish)
-  if not str:find("%b[]") then
-    return
+---Checks if link is valid
+---@param elements table
+---@return function
+function M.link_validator(str, start, finish)
+  local link_is = {balanced = str:find("^%b[]$")}
+  local to_test = {balanced = nil}
+  for k, v in ipair(to_test) do
+    link_is[k] = {}
+    to_test["balanced"] = str:find("^%b[]$")
+
   end
-  local x, y = string.find(str, "[%]]+")
-  local c = b - a
-  local z = y - x
-  if c == z and c == 2 or 3 then
-    return true
-  else
-    return false
-  end
+  return link_is
 end
 
 local function subs(line, s, f)
@@ -182,9 +184,10 @@ local function subs(line, s, f)
 end
 
 function M.get_visual()
-  local s = vim.fn.getpos("'<")
-  local f = vim.fn.getpos("'>")
+  local s = vim.fn.getpos("'<") -- [bufnum, lnum, col, off]
+  local f = vim.fn.getpos("'>") -- [bufnum, lnum, col, off]
 
+  -- lnum must be equal
   if s[2] ~= f[2] then
     return vim.cmd(
              [[echo "Selection spans multiple lines - Only single line links allowed"]])
@@ -199,6 +202,8 @@ end
 
 -- deletes a range of extmarks line wise, zero based index
 function M.delete_range_extmark(buf, namespace, start, finish)
+
+  -- [extmark_id, row, col].
   local extmarks = api.nvim_buf_get_extmarks(buf, namespace, {start, 0},
                                              {finish, 0}, {})
   for _, v in ipairs(extmarks) do
@@ -227,6 +232,17 @@ end
 
 function M.get_localhost_address(s)
   return s:gsub(".+(:%d+)", "http://localhost%1")
+end
+
+function Get_cur_buf_zettelid()
+
+  -- return cmd.query_id()
+
+  local cur_buf = api.nvim_get_current_buf()
+  local buf_name = api.nvim_buf_get_name(cur_buf)
+
+  print(cur_buf)
+  print(buf_name)
 end
 
 function M.get_current_id()
