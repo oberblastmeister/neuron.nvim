@@ -40,7 +40,7 @@ function M.set_keymaps()
   api.nvim_buf_set_keymap(0, "v", "<CR>",
                           ":lua require'neuron/utils'.create_link(1)<CR>",
                           {noremap = true})
-  -- M.map_buf("j", "<cmd>lua require'neuron/utils'.create_link()<CR>")
+  M.map_buf("j", "<cmd>lua require'neuron/utils'.open_or_create()<CR>")
 end
 
 function M.setup()

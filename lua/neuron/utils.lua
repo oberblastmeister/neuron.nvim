@@ -1,6 +1,7 @@
 local api = vim.api
 local uv = vim.loop
 local Job = require("plenary/job")
+local query = require("neuron/query")
 
 local M = {}
 
@@ -86,23 +87,12 @@ function M.open()
     return
   end
 
-  local buf_zetteldid = M.get_current_id()
+  local current_id = M.get_current_id()
   local link_id = link["zettelID"]
 
-  print(vim.inspect(buf_zetteldid))
+  print(vim.inspect(current_id))
   print(vim.inspect(link_id))
-  -- local path = config.path:joinpath(link['link']):expand()
-  -- local is_new = not Path:new(path):exists()
 
-  -- if is_new then vim.cmd('write') end
-  -- vim.cmd('e ' .. path)
-  -- vim.api.nvim_set_current_dir(config.path:expand())
-
-  -- if is_new and vim.api.nvim_buf_line_count(0) == 1 then
-  --   vim.api.nvim_buf_set_lines(0, 1, 1, false, {
-  --     '', ("[%s](%s)"):format(link_to_name(current_file), current_file)
-  --   })
-  -- end
 end
 
 function M.get_cword()
@@ -135,7 +125,7 @@ function M.create_link(visual)
     return
   end
 
-  -- print(string.format("found: %s", vim.inspect(word)))
+  print(string.format("found: %s", vim.inspect(word)))
 
   local line = api.nvim_get_current_line()
   -- -- local file_name =
@@ -143,47 +133,47 @@ end
 
 -- allowed chars in zettelID
 -- https://github.com/srid/neuron/blob/8d9bc7341422a2346d8fd6dc35624723c6525f40/neuron/src/lib/Neuron/Zettelkasten/ID.hs#L83
-local allowed_chars = {
-  "_",
-  "-",
-  ".",
-  -- Whitespace is essential for title IDs
-  -- This gets replaced with underscore in ID slug
-  " ",
-  -- Allow some puctuation letters that are common in note titles
-  ",",
-  ";",
-  "(",
-  ")",
-  ":",
-  "\"",
-  "'",
-}
+-- local allowed_chars = { "_", "-", ".", -- Whitespace is essential for title IDs -- This gets replaced with underscore in ID slug " ", -- Allow some puctuation letters that are common in note titles ",", ";", "(", ")", ":", "\"", "'", }
 
-function M.scanner(line)
-  local pos = 1
+function M.scanner(line, pos)
+  pos = pos or 1
   return function()
     while true do
-      -- TODO: Is the "%b[]" enough? <20-01-21, Frands Otting> --
       -- It'll find links like [[[[[index]] because finds matching brackets
-      local start, finish = line:find("%b[]", pos)
+      -- TODO: Returns a link twice --
+      local start, finish = line:find("%[+[^%[%]]-%]+", pos)
 
       if not start then
         break
       end
 
-      pos = finish + 1
-
       str = line:sub(start, finish)
 
-      -- TODO: Check for allowed_chars see above ^^^ Frands --
+      local valid_link = M.valid_link(str)
+
+      pos = finish + 1
+
       return {
-        str = str,
-        zettelID = str:match("%[([^%[%]]-)%]"),
+        full_str = str,
+        inside_str = str:match("%[([^%[%]]-)%]"),
         start = start,
         finish = finish,
       }
     end
+  end
+end
+
+function M.valid_link(str, start, finish)
+  if not str:find("%b[]") then
+    return
+  end
+  local x, y = string.find(str, "[%]]+")
+  local c = b - a
+  local z = y - x
+  if c == z and c == 2 or 3 then
+    return true
+  else
+    return false
   end
 end
 

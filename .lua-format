@@ -11,7 +11,7 @@ break_before_table_rb: false
 chop_down_kv_table: true
 chop_down_parameter: true
 chop_down_table: true
-column_limit: 100
+column_limit: 120
 column_table_limit: 80
 continuation_indent_width: 2
 double_quote_to_single_quote: false
