@@ -21,12 +21,15 @@ function M.query_graph(callback_fn)
 
 end
 
-function Mbuild_table()
+function M.wrap_json(callback_fn)
 
-  return M.query_graph(function(graph)
-    return graph
-  end)
+  return function(error, data)
+    assert(not error, error)
 
+    -- local decoded_data = vim.fn.json_decode(data)
+    local decoded_data = vim.fn.json_decode(data)
+    callback_fn(decoded_data)
+  end
 end
 
 local basic_data = {
