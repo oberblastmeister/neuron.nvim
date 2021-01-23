@@ -39,6 +39,7 @@ function M.build_table()
   M.query_graph(function(graph)
     NeuronGraph = {}
 
+    -- Parts of the json output to go trough
     local vertices = graph.result.vertices
     local adjacency_map = graph.result.adjacencyMap
 
@@ -55,11 +56,12 @@ function M.build_table()
       end
     end
 
-    ------------
-
-    for zettelid, v in pairs(adjacency_map) do
-
-      -- vim.tbl_extend("keep", NeuronGraph[zettelid], v)
+    -- find connections
+    for zettelid, links in pairs(adjacency_map) do
+      NeuronGraph[zettelid]["connections"] = {}
+      for k, v in pairs(links) do
+        NeuronGraph[zettelid]["connections"][k] = v[1]
+      end
     end
 
     print(vim.inspect(NeuronGraph))
