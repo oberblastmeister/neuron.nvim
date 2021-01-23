@@ -63,6 +63,20 @@ function M.build_table()
         NeuronGraph[zettelid]["connections"][k] = v[1]
       end
     end
+    ---------------------------------------------
+
+    -- find missing links. If a valid link doesn't lead to a existing note
+    for zettelid, issues in pairs(skipped) do
+      NeuronGraph[zettelid]["issues"] = {}
+      for _, v in pairs(issues) do
+        if v == "ZettelIssue_MissingLinks" then
+          NeuronGraph[zettelid]["issues"]["missing_links"] = {}
+          NeuronGraph[zettelid]["issues"]["missing_links"] =
+            issues["contents"][2]
+        end
+      end
+    end
+    --------------------------------------
 
     print(vim.inspect(NeuronGraph))
   end)
