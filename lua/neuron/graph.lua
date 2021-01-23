@@ -56,11 +56,27 @@ function M.build_table()
       end
     end
 
-    -- find connections
+    -- find connections -------------------
     for zettelid, links in pairs(adjacency_map) do
-      NeuronGraph[zettelid]["connections"] = {}
       for k, v in pairs(links) do
-        NeuronGraph[zettelid]["connections"][k] = v[1]
+
+        if not NeuronGraph[zettelid]["connections"] then
+          NeuronGraph[zettelid]["connections"] = {}
+        end
+
+        if v[1] == "Folgezettel" then
+          if not NeuronGraph[zettelid]["connections"]["folgezettel"] then
+            NeuronGraph[zettelid]["connections"]["folgezettel"] = {}
+          end
+          table.insert(NeuronGraph[zettelid]["connections"]["folgezettel"], k)
+        end
+
+        if v[1] == "OrdinaryConnection" then
+          if not NeuronGraph[zettelid]["connections"]["ordinary"] then
+            NeuronGraph[zettelid]["connections"]["ordinary"] = {}
+          end
+          table.insert(NeuronGraph[zettelid]["connections"]["ordinary"], k)
+        end
       end
     end
     ---------------------------------------------
@@ -79,6 +95,7 @@ function M.build_table()
     --------------------------------------
 
     print(vim.inspect(NeuronGraph))
+
   end)
 end
 
