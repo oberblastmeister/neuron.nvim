@@ -36,6 +36,15 @@ local basic_data = {
 
 function M.build_table()
 
+  local basic_data = {
+    "zettelTags",
+    "zettelDate",
+    "zettelID",
+    "zettelSlug",
+    "zettelPath",
+    "zettelTitle",
+  }
+
   M.query_graph(function(graph)
 
     NeuronGraph = {}
@@ -45,7 +54,12 @@ function M.build_table()
     local adjacency_map = graph.result.adjacencyMap
     local skipped = graph.skipped
 
+    -----------------------
+    --  Find basic info  --
+    -----------------------
+    --
     -- Add basic info, e.g zettelDate, zettelTitle etc.
+    --
     for zettelid, zetteltbl in pairs(vertices) do
 
       NeuronGraph[zettelid] = {}
@@ -60,7 +74,12 @@ function M.build_table()
       end
     end
 
-    -- find connections -------------------
+    ------------------------
+    --  Find connections  --
+    ------------------------
+    --
+    -- go trough adjacencyMap
+    --
     for zettelid, links in pairs(adjacency_map) do
       for k, v in pairs(links) do
 
@@ -83,9 +102,13 @@ function M.build_table()
         end
       end
     end
-    ---------------------------------------------
 
+    -------------------
+    --  Find issues  --
+    -------------------
+    --
     -- find missing links. If a valid link doesn't lead to a existing note
+    --
     for zettelid, issues in pairs(skipped) do
       NeuronGraph[zettelid]["issues"] = {}
       for _, v in pairs(issues) do
@@ -96,7 +119,6 @@ function M.build_table()
         end
       end
     end
-    --------------------------------------
 
     print(vim.inspect(NeuronGraph))
 
