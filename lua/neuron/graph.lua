@@ -37,11 +37,13 @@ local basic_data = {
 function M.build_table()
 
   M.query_graph(function(graph)
+
     NeuronGraph = {}
 
     -- Parts of the json output to go trough
     local vertices = graph.result.vertices
     local adjacency_map = graph.result.adjacencyMap
+    local skipped = graph.skipped
 
     -- Add basic info, e.g zettelDate, zettelTitle etc.
     for zettelid, zetteltbl in pairs(vertices) do
@@ -50,7 +52,9 @@ function M.build_table()
 
       for k, v in pairs(zetteltbl) do
         if vim.tbl_contains(basic_data, k) then
-          NeuronGraph[zettelid][k] = v
+          if v ~= vim.NIL then
+            NeuronGraph[zettelid][k] = v
+          end
         end
 
       end
