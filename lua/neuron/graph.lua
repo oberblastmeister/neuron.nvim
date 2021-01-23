@@ -1,6 +1,5 @@
 local config = require("neuron/config")
 local Job = require("plenary/job")
-local api = vim.api
 
 local M = {}
 
@@ -8,17 +7,11 @@ function M.query_graph(callback_fn)
 
   Job:new{
     command = "neuron",
-    args = {"-d", config.neuron_dir, "query", "--graph"},
+    args = {"-d", config.neuron_dir, "query", "--graph", "--cached"},
     interactive = false,
     enable_recording = true,
-    on_stdout = vim.schedule_wrap(function(error, data)
-      assert(not error, error)
-
-      local graph = vim.fn.json_decode(data)
-      callback_fn(graph)
-    end),
+    on_stdout = vim.schedule_wrap(M.wrap_json(callback_fn)),
   }:start()
-
 end
 
 function M.wrap_json(callback_fn)
