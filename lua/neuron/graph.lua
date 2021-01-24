@@ -30,66 +30,102 @@ end
 
 function M.add_all_virtual_titles(buf)
   local cur_zettelid = utils.get_current_id()
-  if not NeuronGraph[cur_zettelid]["connections"] then
-    return
-  end
+  assert(cur_zettelid)
 
-  local links_to = NeuronGraph[cur_zettelid]["connections"]
+  -- if not NeuronGraph[cur_zettelid]["connections"]
+  --   or NeuronGraph[cur_zettelid]["issues"] then
+  --   return
+  -- end
+
+  local zettel_info = NeuronGraph[cur_zettelid]
 
   for ln, line in ipairs(api.nvim_buf_get_lines(buf, 0, -1, true)) do
-    M.add_virtual_title_current_line(buf, ln, line, links_to)
+    M.add_virtual_title_current_line(buf, ln, line, zettel_info)
   end
 end
 
-function M.add_virtual_title_current_line(buf, ln, line, connections)
-  local ordinary_links
-  local folgezettels
-  if connections["ordinary"] then
-    ordinary_links = connections["ordinary"]
+function M.add_virtual_title_current_line(buf, ln, line, zettel_info)
+
+  local links_to_find = nil
+  local issues_to_find = nil
+
+  if zettel_info.connections.ordinary then
+    local ord_links = zettel_info.connections.ordinary
+    for ol in pairs(ord_links) do
+      -- print(vim.inspect(ord_links[ol]))
+      local get_zettel_info = NeuronGraph[ord_links[ol]]
+      -- TODO: Use scanner here <24-01-21, Frands Otting> --
+      -- TODO: don't find link title, unless there's a valid link <24-01-21, Frands Otting> --
+      local link_title = get_zettel_info["zettelTitle"]
+      if link_title then
+        if not links_to_find then
+          links_to_find = {}
+        end
+        if not links_to_find.ordinary_links then
+          links_to_find["ordinary_links"] = {}
+        end
+        links_to_find["ordinary_links"][ord_links[ol]] = link_title
+      end
+    end
+    print(vim.inspect(links_to_find))
   end
-  if connections["folgezettel"] then
-    folgezettels = connections["folgezettel"]
+
+  if zettel_info.connections.folgezettel then
+    local folgezettels = zettel_info.connections.folgezettel
+    for fz in pairs(folgezettels) do
+      -- print(vim.inspect(folgezettels[fz]))
+      local get_zettel_info = NeuronGraph[folgezettels[fz]]
+      -- TODO: Use scanner here <24-01-21, Frands Otting> --
+      -- TODO: don't find link title, unless there's a valid link <24-01-21, Frands Otting> --
+      local link_title = get_zettel_info["zettelTitle"]
+      if link_title then
+        if not links_to_find then
+          links_to_find = {}
+        end
+        if not links_to_find.folgezettels then
+          links_to_find["folgezettels"] = {}
+        end
+        links_to_find["folgezettels"][folgezettels[fz]] = link_title
+      end
+    end
+    print(vim.inspect(links_to_find))
   end
-  print(vim.inspect(folgezettels))
-  print(vim.inspect(ordinary_links))
+
+  if zettel_info.issues then
+    local cur_issues = zettel_info.issues
+    for issue, _ in pairs(cur_issues) do
+      -- print(vim.inspect(issue))
+      for _, v in pairs(cur_issues[issue]) do
+        -- print(vim.inspect(v))
+        if not issues_to_find then
+          issues_to_find = {}
+        end
+        if not issues_to_find[issue] then
+          issues_to_find[issue] = {}
+        end
+        table.insert(issues_to_find[issue], v)
+      end
+    end
+    print(vim.inspect(issues_to_find))
+  end
+
   assert(1 == 2)
 
+  -- local local_line = line
   -- TODO: Add link scanner from utils branch --
   -- local id = utils.match_link(line)
   -- if id == nil then
   --   return
   -- end
-  -- local start_col, end_col = utils.find_link(line)
+  local start_col, end_col = utils.find_link(line)
 
-  -- Todo: add array of titles, if line contains more than one link
+  -- Todo: add array of titles when line contains more than one link
   local title
   -- lua is one indexed
   api.nvim_buf_set_extmark(buf, ns, ln - 1, start_col - 1, {
     end_col = end_col,
     virt_text = {{title, config.virt_text_highlight}},
   })
-  -- TODO: Remove this query and use NeuronGraph instead
-  -- cmd.query_id(id, config.neuron_dir, function(json)
-  --   if type(json) == "userdata" then
-  --     return
-  --   end
-  --   if json == nil then
-  --     return
-  --   end
-  --   if json.error then
-  --     return
-  --   end
-  --   if json.result.Left ~= nil then
-  --     utils.delete_range_extmark(buf, ns, ln - 1, ln) -- minus one to convert from 1 based index to api zero based index
-  --     return
-  --   end
-  -- local title = json.result.Right.zettelTitle
-  -- -- lua is one indexed
-  -- api.nvim_buf_set_extmark(buf, ns, ln - 1, start_col - 1, {
-  --   end_col = end_col,
-  --   virt_text = {{title, config.virt_text_highlight}},
-  -- })
-  -- end)
 end
 
 function M.build_table()
