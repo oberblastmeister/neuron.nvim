@@ -1,7 +1,10 @@
 local config = require("neuron/config")
 local Job = require("plenary/job")
+local api = vim.api
+local utils = require("neuron/utils")
 
 local M = {}
+local ns = api.nvim_create_namespace("neuron.nvim")
 
 function M.query_graph(callback_fn)
 
@@ -25,14 +28,69 @@ function M.wrap_json(callback_fn)
   end
 end
 
-local basic_data = {
-  "zettelTags",
-  "zettelDate",
-  "zettelID",
-  "zettelSlug",
-  "zettelPath",
-  "zettelTitle",
-}
+function M.add_all_virtual_titles(buf)
+  local cur_zettelid = utils.get_current_id()
+  if not NeuronGraph[cur_zettelid]["connections"] then
+    return
+  end
+
+  local links_to = NeuronGraph[cur_zettelid]["connections"]
+
+  for ln, line in ipairs(api.nvim_buf_get_lines(buf, 0, -1, true)) do
+    M.add_virtual_title_current_line(buf, ln, line, links_to)
+  end
+end
+
+function M.add_virtual_title_current_line(buf, ln, line, connections)
+  local ordinary_links
+  local folgezettels
+  if connections["ordinary"] then
+    ordinary_links = connections["ordinary"]
+  end
+  if connections["folgezettel"] then
+    folgezettels = connections["folgezettel"]
+  end
+  print(vim.inspect(folgezettels))
+  print(vim.inspect(ordinary_links))
+  assert(1 == 2)
+
+  -- TODO: Add link scanner from utils branch --
+  -- local id = utils.match_link(line)
+  -- if id == nil then
+  --   return
+  -- end
+  -- local start_col, end_col = utils.find_link(line)
+
+  -- Todo: add array of titles, if line contains more than one link
+  local title
+  -- lua is one indexed
+  api.nvim_buf_set_extmark(buf, ns, ln - 1, start_col - 1, {
+    end_col = end_col,
+    virt_text = {{title, config.virt_text_highlight}},
+  })
+  -- TODO: Remove this query and use NeuronGraph instead
+  -- cmd.query_id(id, config.neuron_dir, function(json)
+  --   if type(json) == "userdata" then
+  --     return
+  --   end
+  --   if json == nil then
+  --     return
+  --   end
+  --   if json.error then
+  --     return
+  --   end
+  --   if json.result.Left ~= nil then
+  --     utils.delete_range_extmark(buf, ns, ln - 1, ln) -- minus one to convert from 1 based index to api zero based index
+  --     return
+  --   end
+  -- local title = json.result.Right.zettelTitle
+  -- -- lua is one indexed
+  -- api.nvim_buf_set_extmark(buf, ns, ln - 1, start_col - 1, {
+  --   end_col = end_col,
+  --   virt_text = {{title, config.virt_text_highlight}},
+  -- })
+  -- end)
+end
 
 function M.build_table()
 
@@ -47,6 +105,7 @@ function M.build_table()
 
   M.query_graph(function(graph)
 
+    print("Caching Neuron data...")
     NeuronGraph = {}
 
     -- Parts of the json output to go trough
@@ -120,8 +179,8 @@ function M.build_table()
       end
     end
 
-    print(vim.inspect(NeuronGraph))
-
+    M.add_all_virtual_titles()
+    print("Done caching Neuron..")
   end)
 end
 
