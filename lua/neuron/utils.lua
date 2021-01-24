@@ -136,34 +136,50 @@ end
 -- https://github.com/srid/neuron/blob/8d9bc7341422a2346d8fd6dc35624723c6525f40/neuron/src/lib/Neuron/Zettelkasten/ID.hs#L83
 -- local allowed_chars = { "_", "-", ".", -- Whitespace is essential for title IDs -- This gets replaced with underscore in ID slug " ", -- Allow some puctuation letters that are common in note titles ",", ";", "(", ")", ":", "\"", "'", }
 
-function M.scanner(line)
+function M.scanner(line, pattern)
+
+  -- if link_type == "ordinary" then
+  --   pattern = "%[%[" .. zettelid .. "%]%]"
+  -- elseif link_type == "folgezettel" then
+  --   pattern = "%[%[%[" .. zettelid .. "%]%]%]"
+  -- elseif zettelid then
+  --   pattern = "[%[]+%[%[" .. zettelid .. "%]%][%]]+"
+  -- else
+  --   pattern = "%[+[^%[%]]-%]+"
+  -- end
+
   pos = 1
-  -- pos = pos or 1
+
   return function()
+    -- print(vim.inspect(line))
     while true do
       -- TODO: How can this be improved <21-01-21> --
-      local start, finish = line:find("%[+[^%[%]]-%]+", pos)
+      local start, finish = line:find(pattern, pos)
 
       if not start then
         break
       end
 
-      str = line:sub(start, finish)
+      -- str = line:sub(start, finish)
 
-      link_is = M.link_validator(str, start, finish)
+      -- link_is = M.link_validator(str, start, finish)
 
-      -- pos = finish + 1
+      pos = finish + 1
 
       return {
-        full_str = str,
-        inside_str = str:match("%[([^%[%]]-)%]"),
-        start = start,
-        finish = finish,
-        balanced = link_is.balanced,
+        start,
+        finish,
+        -- full_str = str,
+
+        -- zettelid = zettelid or str:match("%[([^%[%]]-)%]"),
+        -- start = start,
+        -- finish = finish,
+        -- balanced = link_is.balanced,
       }
     end
   end
 end
+-- end
 
 ---Checks if link is valid
 ---@param elements table

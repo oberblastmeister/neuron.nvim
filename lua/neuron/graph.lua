@@ -38,94 +38,85 @@ function M.add_all_virtual_titles(buf)
   -- end
 
   local zettel_info = NeuronGraph[cur_zettelid]
-
-  for ln, line in ipairs(api.nvim_buf_get_lines(buf, 0, -1, true)) do
-    M.add_virtual_title_current_line(buf, ln, line, zettel_info)
+  if zettel_info.connections then
+    for ln, line in ipairs(api.nvim_buf_get_lines(buf, 0, -1, true)) do
+      M.add_virtual_title_current_line(buf, ln, line, zettel_info)
+    end
   end
+
 end
 
 function M.add_virtual_title_current_line(buf, ln, line, zettel_info)
 
-  local links_to_find = nil
-  local issues_to_find = nil
+  local links_to_mark = nil
+  local issues_to_mark = nil
 
   if zettel_info.connections.ordinary then
-    local ord_links = zettel_info.connections.ordinary
-    for ol in pairs(ord_links) do
-      -- print(vim.inspect(ord_links[ol]))
-      local get_zettel_info = NeuronGraph[ord_links[ol]]
-      -- TODO: Use scanner here <24-01-21, Frands Otting> --
-      -- TODO: don't find link title, unless there's a valid link <24-01-21, Frands Otting> --
-      local link_title = get_zettel_info["zettelTitle"]
-      if link_title then
-        if not links_to_find then
-          links_to_find = {}
-        end
-        if not links_to_find.ordinary_links then
-          links_to_find["ordinary_links"] = {}
-        end
-        links_to_find["ordinary_links"][ord_links[ol]] = link_title
+    for _, ol in pairs(zettel_info.connections.ordinary) do
+      local zettelid = ol
+      local pattern = "%[%[" .. zettelid .. "%]%]"
+      for v in utils.scanner(line, pattern) do
+        local link_title = NeuronGraph[zettelid]["zettelTitle"]
+        -- lua is one indexed
+        api.nvim_buf_set_extmark(buf, ns, ln - 1, v[1] - 1, {
+          end_col = v[2],
+          virt_text = {{link_title, config.virt_text_highlight}},
+        })
       end
     end
-    print(vim.inspect(links_to_find))
   end
 
-  if zettel_info.connections.folgezettel then
-    local folgezettels = zettel_info.connections.folgezettel
-    for fz in pairs(folgezettels) do
-      -- print(vim.inspect(folgezettels[fz]))
-      local get_zettel_info = NeuronGraph[folgezettels[fz]]
-      -- TODO: Use scanner here <24-01-21, Frands Otting> --
-      -- TODO: don't find link title, unless there's a valid link <24-01-21, Frands Otting> --
-      local link_title = get_zettel_info["zettelTitle"]
-      if link_title then
-        if not links_to_find then
-          links_to_find = {}
-        end
-        if not links_to_find.folgezettels then
-          links_to_find["folgezettels"] = {}
-        end
-        links_to_find["folgezettels"][folgezettels[fz]] = link_title
-      end
-    end
-    print(vim.inspect(links_to_find))
-  end
+  -- print(vim.inspect(links_to_mark))
 
-  if zettel_info.issues then
-    local cur_issues = zettel_info.issues
-    for issue, _ in pairs(cur_issues) do
-      -- print(vim.inspect(issue))
-      for _, v in pairs(cur_issues[issue]) do
-        -- print(vim.inspect(v))
-        if not issues_to_find then
-          issues_to_find = {}
-        end
-        if not issues_to_find[issue] then
-          issues_to_find[issue] = {}
-        end
-        table.insert(issues_to_find[issue], v)
-      end
-    end
-    print(vim.inspect(issues_to_find))
-  end
+  -- print(vim.inspect(ord_links[ol]))
 
-  assert(1 == 2)
-
-  -- local local_line = line
-  -- TODO: Add link scanner from utils branch --
-  -- local id = utils.match_link(line)
-  -- if id == nil then
-  --   return
+  -- if zettel_info.connections.folgezettel then
+  --   local folgezettels = zettel_info.connections.folgezettel
+  --   for fz in pairs(folgezettels) do
+  --     -- print(vim.inspect(folgezettels[fz]))
+  --     local get_zettel_info = NeuronGraph[folgezettels[fz]]
+  --     -- TODO: Use scanner here <24-01-21, Frands Otting> --
+  --     -- TODO: don't find link title, unless there's a valid link <24-01-21, Frands Otting> --
+  --     local link_title = get_zettel_info["zettelTitle"]
+  --     if link_title then
+  --       if not links_to_mark then
+  --         links_to_mark = {}
+  --       end
+  --       if not links_to_mark.folgezettels then
+  --         links_to_mark["folgezettels"] = {}
+  --       end
+  --       links_to_mark["folgezettels"][folgezettels[fz]] = link_title
+  --     end
+  --   end
+  --   print(vim.inspect(links_to_mark))
   -- end
-  local start_col, end_col = utils.find_link(line)
 
-  -- Todo: add array of titles when line contains more than one link
-  local title
+  -- if zettel_info.issues then
+  --   local cur_issues = zettel_info.issues
+  --   for issue, _ in pairs(cur_issues) do
+  --     -- print(vim.inspect(issue))
+  --     for _, v in pairs(cur_issues[issue]) do
+  --       -- print(vim.inspect(v))
+  --       if not issues_to_mark then
+  --         issues_to_mark = {}
+  --       end
+  --       if not issues_to_mark[issue] then
+  --         issues_to_mark[issue] = {}
+  --       end
+  --       table.insert(issues_to_mark[issue], v)
+  --     end
+  --   end
+  --   print(vim.inspect(issues_to_mark))
+  -- end
+
+  -- assert(1 == 2)
+
   -- lua is one indexed
-  api.nvim_buf_set_extmark(buf, ns, ln - 1, start_col - 1, {
-    end_col = end_col,
-    virt_text = {{title, config.virt_text_highlight}},
-  })
+  -- api.nvim_buf_set_extmark(buf, ns, ln - 1, start_col - 1, {
+  --   end_col = end_col,
+  --   virt_text = {{title, config.virt_text_highlight}},
+  -- })
+
 end
 
 function M.build_table()
@@ -145,17 +136,21 @@ function M.build_table()
     NeuronGraph = {}
 
     -- Parts of the json output to go trough
-    local vertices = graph.result.vertices
-    local adjacency_map = graph.result.adjacencyMap
-    local skipped = graph.skipped
-
+    local verti
+    local adjacency_map
+    local skip
+    if type(graph) ~= "userdata" then
+      verti = graph.result.vertices
+      adjacency_map = graph.result.adjacencyMap
+      skip = graph.skipped
+    end
     -----------------------
     --  Find basic info  --
     -----------------------
     --
     -- Add basic info, e.g zettelDate, zettelTitle etc.
     --
-    for zettelid, zetteltbl in pairs(vertices) do
+    for zettelid, zetteltbl in pairs(verti) do
 
       NeuronGraph[zettelid] = {}
 
@@ -204,7 +199,7 @@ function M.build_table()
     --
     -- find missing links. If a valid link doesn't lead to a existing note
     --
-    for zettelid, issues in pairs(skipped) do
+    for zettelid, issues in pairs(skip) do
       NeuronGraph[zettelid]["issues"] = {}
       for _, v in pairs(issues) do
         if v == "ZettelIssue_MissingLinks" then
