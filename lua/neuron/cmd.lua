@@ -5,13 +5,13 @@ local M = {}
 
 ---@param opts table
 function M.neuron(opts)
-  Job:new {
+  Job:new{
     command = "neuron",
     args = opts.args,
     cwd = opts.neuron_dir,
     on_stderr = utils.on_stderr_factory(opts.name or "cmd.neuron"),
     on_stdout = vim.schedule_wrap(M.json_stdout_wrap(opts.callback)),
-    interactive = false
+    interactive = false,
   }:start()
 end
 
@@ -24,7 +24,7 @@ function M.query(arg_opts, neuron_dir, json_fn)
     args = M.query_arg_maker(arg_opts),
     neuron_dir = neuron_dir,
     name = "cmd.query",
-    callback = json_fn
+    callback = json_fn,
   }
 end
 
@@ -67,7 +67,7 @@ function M.query_id(id, neuron_dir, json_fn)
     args = {"query", "--cached", "--id", id},
     neuron_dir = neuron_dir,
     name = "cmd.query_id",
-    callback = json_fn
+    callback = json_fn,
     -- interactive = false
   }
 end
@@ -82,48 +82,44 @@ function M.json_stdout_wrap(json_fn)
 end
 
 function M.new_edit(neuron_dir)
-  Job:new {
+  Job:new{
     command = "neuron",
     args = {"new"},
     cwd = neuron_dir,
     -- on_stderr = utils.on_stderr_factory("neuron new"),
     interactive = false,
-    on_stdout = vim.schedule_wrap(
-      function(error, data)
-        assert(not error, error)
+    on_stdout = vim.schedule_wrap(function(error, data)
+      assert(not error, error)
 
-        vim.cmd("edit " .. data)
-        utils.start_insert_header()
-      end
-    ),
-    on_exit = utils.on_exit_factory("neuron new")
+      vim.cmd("edit " .. data)
+      utils.start_insert_header()
+    end),
+    on_exit = utils.on_exit_factory("neuron new"),
   }:start()
 end
 
 function M.new_and_callback(neuron_dir, callback)
-  Job:new {
+  Job:new{
     command = "neuron",
     args = {"new"},
     cwd = neuron_dir,
     on_stderr = utils.on_stderr_factory("neuron new"),
-    on_stdout = vim.schedule_wrap(
-      function(error, data)
-        assert(not error, error)
+    on_stdout = vim.schedule_wrap(function(error, data)
+      assert(not error, error)
 
-        callback(data)
-      end
-    ),
-    on_exit = utils.on_exit_factory("neuron new")
+      callback(data)
+    end),
+    on_exit = utils.on_exit_factory("neuron new"),
   }:start()
 end
 
 function M.gen(neuron_dir)
-  Job:new {
+  Job:new{
     command = "neuron",
     name = "neuron.gen_cache_on_write",
     args = {"gen"},
     cwd = neuron_dir,
-    interactive = false
+    interactive = false,
   }:start()
 end
 
