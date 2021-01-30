@@ -94,7 +94,8 @@ function M.add_virtual_title_current_line(buf, ln, line)
       return
     end
     -- if json.result.Left ~= nil then
-    --   utils.delete_range_extmark(buf, ns, ln - 1, ln) -- minus one to convert from 1 based index to api zero based index
+    -- minus one to convert from 1 based index to api zero based index
+    --   utils.delete_range_extmark(buf, ns, ln - 1, ln)
     --   return
     -- end
     local title = json.Title
