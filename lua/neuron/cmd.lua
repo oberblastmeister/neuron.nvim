@@ -118,6 +118,9 @@ function M.new_and_callback(neuron_dir, callback)
 end
 
 function M.gen(neuron_dir)
+  if NeuronJob then
+    return
+  end
   Job:new {
     command = "neuron",
     name = "neuron.gen_cache_on_write",
