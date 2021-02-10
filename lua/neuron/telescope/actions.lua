@@ -2,7 +2,7 @@ local api = vim.api
 local config = require("neuron/config")
 local cmd = require("neuron/cmd")
 local utils = require("neuron/utils")
-local actions = require('telescope.actions')
+local actions = require("telescope.actions")
 
 local M = {}
 
@@ -11,7 +11,7 @@ function M.insert_maker(key)
     actions.close(prompt_bufnr)
 
     local entry = actions.get_selected_entry()
-    api.nvim_put({entry[key]}, "c", true, true)
+    api.nvim_put({"[[" .. entry[key] .. "]]"}, "c", true, true)
   end
 end
 
