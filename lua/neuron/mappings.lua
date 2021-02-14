@@ -25,7 +25,7 @@ function M.set_keymaps()
   M.map_buf("b", "<cmd>lua require'neuron/telescope'.find_backlinks()<CR>")
   M.map_buf("B", "<cmd>lua require'neuron/telescope'.find_backlinks {insert = true}<CR>")
 
-  M.map_buf("t", "<cmd>lua require'neuron/telescope'.find_tags()<CR>")
+  M.map_buf("t", "<cmd>lua R('neuron.telescope').find_tags()<CR>")
 
   M.map_buf("s", "<cmd>lua require'neuron'.rib()<CR>")
 
@@ -34,7 +34,7 @@ function M.set_keymaps()
 end
 
 function M.setup()
-  vim.cmd(string.format("au BufRead %s/*.md lua require'neuron/mappings'.set_keymaps()", config.neuron_dir))
+  vim.cmd(string.format("au BufRead %s/*.md lua R'neuron/mappings'.set_keymaps()", config.neuron_dir))
   M.map("i", "<cmd>lua require'neuron'.goto_index()<CR>")
 end
 

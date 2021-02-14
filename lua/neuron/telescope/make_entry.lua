@@ -20,7 +20,7 @@ function M.gen_from_links(entry)
 end
 
 function M.gen_from_tags(entry)
-  local display = entry.name
+  local display = entry
   return {display = display, value = display, ordinal = display}
 end
 

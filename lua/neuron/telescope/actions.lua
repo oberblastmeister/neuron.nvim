@@ -11,7 +11,12 @@ function M.insert_maker(key)
     actions.close(prompt_bufnr)
 
     local entry = actions.get_selected_entry()
-    api.nvim_put({"[[" .. entry[key] .. "]]"}, "c", true, true)
+    if key == "id" then
+      api.nvim_put({"[[" .. entry[key] .. "]]"}, "c", true, true)
+    end
+    if key == "display" then
+      api.nvim_put({"#" .. entry[key]}, "c", true, true)
+    end
   end
 end
 

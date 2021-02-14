@@ -55,7 +55,7 @@ function M.find_backlinks(opts)
     local picker_opts = {
       prompt_title = "Find Backlinks",
       finder = finders.new_table {
-        results = json,
+        results = json.result,
         entry_maker = neuron_entry.gen_from_links
       },
       previewer = previewers.vim_buffer_cat.new(opts),
@@ -77,7 +77,7 @@ end
 function M.find_tags(opts)
   opts = opts or {}
 
-  cmd.query({uri = "z:tags"}, config.neuron_dir, function(json)
+  cmd.query({tags = true}, config.neuron_dir, function(json)
     local picker_opts = {
       prompt_title = "Find Tags",
       finder = finders.new_table {
