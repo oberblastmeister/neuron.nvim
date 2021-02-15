@@ -33,10 +33,9 @@ function M.query_arg_maker(opts)
   ---@type table
   local args = {"query"}
 
-  -- if opts.id then
-  --   table.insert(args, "--id")
-  --   table.insert(args, opts.id)
-  -- end
+  if opts.tags then
+    table.insert(args, "--tags")
+  end
 
   if opts.uri then
     table.insert(args, "--uri")
