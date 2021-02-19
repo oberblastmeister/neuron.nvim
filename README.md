@@ -27,6 +27,7 @@ using [packer.nvim](https://github.com/wbthomason/packer.nvim):
 
 ```lua
 use "oberblastmeister/neuron.nvim"
+use 'nvim-lua/popup.nvim'
 use "nvim-lua/plenary.nvim"
 use "nvim-telescope/telescope.nvim"
 ```
@@ -35,6 +36,7 @@ vim-plug:
 
 ```vim
 Plug 'oberblastmeister/neuron.nvim'
+Plug 'nvim-lua/popup.nvim'
 Plug 'nvim-lua/plenary.nvim'
 Plug 'nvim-telescope/telescope.nvim'
 ```
