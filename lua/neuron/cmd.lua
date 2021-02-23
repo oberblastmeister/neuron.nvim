@@ -99,6 +99,25 @@ function M.new_edit(neuron_dir)
   }:start()
 end
 
+function M.new_edit_named(neuron_dir, name)
+  Job:new {
+    command = "neuron",
+    args = {"new", name},
+    cwd = neuron_dir,
+    --on_stderr = utils.on_stderr_factory("neuron new " .. name),
+    interactive = false,
+    on_stdout = vim.schedule_wrap(
+      function(error, data)
+        assert(not error, error)
+
+        vim.cmd("edit " .. data)
+        utils.start_insert_header()
+      end
+    ),
+    on_exit = utils.on_exit_factory("neuron new " .. name)
+  }:start()
+end
+
 function M.new_and_callback(neuron_dir, callback)
   Job:new {
     command = "neuron",
