@@ -103,7 +103,4 @@ function M.start_insert_header()
   M.feedkeys("Go<CR>#<space>", "n")
 end
 
-function M.get_neuron_path(id, neuron_dir)
-  return neuron_dir .. '/' .. id .. '.md'
-end
 return M
