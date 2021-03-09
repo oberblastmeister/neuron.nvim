@@ -74,7 +74,7 @@ end
 --- json_fn takes a json table
 function M.json_stdout_wrap(json_fn)
   return function(job, return_val)
-    assert(return_val==0, "neuron query returned non zero")
+    utils.on_exit_return_check("neuron query", return_val)
     local data = table.concat(job:result())
     json_fn(vim.fn.json_decode(data))
   end
@@ -89,9 +89,7 @@ function M.new_edit(neuron_dir)
     interactive = false,
     on_exit = vim.schedule_wrap(
       function(job, return_val)
-        assert(return_val==0, 
-                string.format("Job neuron new exited with a non-zero code: %s", 
-                                return_val))
+        utils.on_exit_return_check("neuron new", return_val)
         local data = table.concat(job:result())
         vim.cmd("edit " .. data)
         utils.start_insert_header()
@@ -108,9 +106,7 @@ function M.new_and_callback(neuron_dir, callback)
     on_stderr = utils.on_stderr_factory("neuron new"),
     on_exit = vim.schedule_wrap(
       function(job, return_val)
-        assert(return_val==0, 
-                string.format("Job neuron new exited with a non-zero code: %s", 
-                                return_val))
+        utils.on_exit_return_check("neuron new", return_val)
         local data = table.concat(job:result())
 
         callback(data)
