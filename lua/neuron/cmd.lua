@@ -10,7 +10,7 @@ function M.neuron(opts)
     args = opts.args,
     cwd = opts.neuron_dir,
     on_stderr = utils.on_stderr_factory(opts.name or "cmd.neuron"),
-    on_stdout = vim.schedule_wrap(M.json_stdout_wrap(opts.callback)),
+    on_exit = vim.schedule_wrap(M.json_stdout_wrap(opts.callback)),
     interactive = false
   }:start()
 end
@@ -73,9 +73,9 @@ end
 
 --- json_fn takes a json table
 function M.json_stdout_wrap(json_fn)
-  return function(error, data)
-    assert(not error, error)
-
+  return function(job, return_val)
+    assert(return_val==0, "Job returned non zero")
+    local data = table.concat(job:result())
     json_fn(vim.fn.json_decode(data))
   end
 end
