@@ -30,12 +30,12 @@ function M.find_zettels(opts)
     
     if opts.insert then
       picker_opts.attach_mappings = function()
-        actions.goto_file_selection_edit:replace(neuron_actions.insert_maker("id"))
+        actions.select_default:replace(neuron_actions.insert_maker("id"))
         return true
       end
     else
       picker_opts.attach_mappings = function()
-        actions.goto_file_selection_edit:replace(neuron_actions.edit_or_insert)
+        actions.select_default:replace(neuron_actions.edit_or_insert)
         return true
       end
     end
