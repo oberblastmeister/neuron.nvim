@@ -65,7 +65,7 @@ function M.find_backlinks(opts)
 
     if opts.insert then
       picker_opts.attach_mappings = function()
-        actions.goto_file_selection_edit:replace(neuron_actions.insert_maker("id"))
+        actions.select_default:replace(neuron_actions.insert_maker("id"))
         return true
       end
     end
@@ -87,7 +87,7 @@ function M.find_tags(opts)
       previewer = nil,
       sorter = conf.generic_sorter(opts),
       attach_mappings = function()
-        actions.goto_file_selection_edit:replace(neuron_actions.insert_maker("display"))
+        actions.select_default:replace(neuron_actions.insert_maker("display"))
         return true
       end
     }
