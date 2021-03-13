@@ -10,7 +10,7 @@ function M.neuron(opts)
     args = opts.args,
     cwd = opts.neuron_dir,
     on_stderr = utils.on_stderr_factory(opts.name or "cmd.neuron"),
-    on_stdout = vim.schedule_wrap(M.json_stdout_wrap(opts.callback)),
+    on_exit = vim.schedule_wrap(M.json_stdout_wrap(opts.callback)),
     interactive = false
   }:start()
 end
@@ -73,9 +73,9 @@ end
 
 --- json_fn takes a json table
 function M.json_stdout_wrap(json_fn)
-  return function(error, data)
-    assert(not error, error)
-
+  return function(job, return_val)
+    utils.on_exit_return_check("neuron query", return_val)
+    local data = table.concat(job:result())
     json_fn(vim.fn.json_decode(data))
   end
 end
@@ -87,15 +87,14 @@ function M.new_edit(neuron_dir)
     cwd = neuron_dir,
     -- on_stderr = utils.on_stderr_factory("neuron new"),
     interactive = false,
-    on_stdout = vim.schedule_wrap(
-      function(error, data)
-        assert(not error, error)
-
+    on_exit = vim.schedule_wrap(
+      function(job, return_val)
+        utils.on_exit_return_check("neuron new", return_val)
+        local data = table.concat(job:result())
         vim.cmd("edit " .. data)
         utils.start_insert_header()
       end
-    ),
-    on_exit = utils.on_exit_factory("neuron new")
+    )
   }:start()
 end
 
@@ -105,14 +104,14 @@ function M.new_and_callback(neuron_dir, callback)
     args = {"new"},
     cwd = neuron_dir,
     on_stderr = utils.on_stderr_factory("neuron new"),
-    on_stdout = vim.schedule_wrap(
-      function(error, data)
-        assert(not error, error)
+    on_exit = vim.schedule_wrap(
+      function(job, return_val)
+        utils.on_exit_return_check("neuron new", return_val)
+        local data = table.concat(job:result())
 
         callback(data)
       end
-    ),
-    on_exit = utils.on_exit_factory("neuron new")
+    )
   }:start()
 end
 

@@ -34,14 +34,10 @@ function M.on_stderr_factory(name)
   )
 end
 
-function M.on_exit_factory(name)
-  return vim.schedule_wrap(
-    function(self, code, _signal)
-      if code ~= 0 then
-        error(string.format("The job %s exited with a non-zero code: %s", name, code))
-      end
-    end
-  )
+function M.on_exit_return_check(name, code)
+  if code ~= 0 then
+    error(string.format("The job %s exited with a non-zero code: %s", name, code))
+  end
 end
 
 function M.feedkeys(string, mode)
