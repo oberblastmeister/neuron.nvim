@@ -1,6 +1,6 @@
 # neuron.nvim
 
-**Note**: If you want to use this plugin with the latest neuron version please use the unstable branch
+**note**: This is the unstable branch. If you are using the latest version of neuron use this branch
 
 Make neovim the best note taking application. This plugin uses **neovim 0.5** to be able to take advantage of the latest cool features.
 
