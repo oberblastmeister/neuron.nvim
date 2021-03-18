@@ -18,7 +18,7 @@ function M.rib(opts)
 
   opts = opts or {}
   opts.address = opts.address or "127.0.0.1:8080"
-  opts.open = opts.open or true
+  opts.open = opts.open or false
 
   NeuronJob = {}
   NeuronJob = Job:new {
@@ -39,9 +39,10 @@ function M.rib(opts)
     print("Started neuron server at", opts.address)
   end
 
-  local open_address = utils.get_localhost_address(opts.address)
-
-  utils.os_open(open_address)
+  if opts.open then
+    local open_address = utils.get_localhost_address(opts.address)
+    utils.os_open(open_address)
+  end
 end
 
 function M.stop()
