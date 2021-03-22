@@ -7,14 +7,10 @@ M.rib({opts})                                                        *M.rib()*
         {opts} (table)  the options for the job
 
 
-M.setup({user_config})                                             *M.setup()*
+M.setup()                                                          *M.setup()*
     This is the entry point to the plugin. It creates the necessary
     autocommands and mappings.
 
-
-    Parameters: ~
-        {user_config} (table)  the config you want to use. Will be merged into
-                               the default config
 
 
 M.goto_next_extmark()                                  *M.goto_next_extmark()*
