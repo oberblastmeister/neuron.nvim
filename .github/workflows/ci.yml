@@ -32,6 +32,7 @@ jobs:
         run: |
           git clone --depth 1 https://github.com/nvim-lua/plenary.nvim ~/.local/share/nvim/site/pack/vendor/start/plenary.nvim
           git clone --depth 1 https://github.com/tjdevries/tree-sitter-lua ~/.local/share/nvim/site/pack/vendor/start/tree-sitter-lua
+
       - name: Build parser
         run: |
           # We have to build the parser every single time to keep up with parser changes
@@ -40,6 +41,11 @@ jobs:
           cc -o ./build/parser.so -I./src src/parser.c src/scanner.cc -shared -Os -lstdc++ -fPIC
           ln -s ../build/parser.so parser/lua.so
           cd -
+
+      - name: Generating docs
+        run: |
+          export PATH="${PWD}/build/:${PATH}"
+          make docgen
 
       # inspired by nvim-lspconfigs
       - name: Update documentation
