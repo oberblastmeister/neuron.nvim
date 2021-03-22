@@ -7,7 +7,7 @@ docs.test = function()
   local input_files = {
     "./lua/neuron.lua",
     "./lua/neuron/config.lua",
-    "./lua/neuron/mappings.lua.lua",
+    "./lua/neuron/mappings.lua",
   }
 
   -- Maybe sort them that depends what you want and need
