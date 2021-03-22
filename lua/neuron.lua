@@ -174,7 +174,7 @@ local function setup_autocmds()
   vim.cmd [[augroup END]]
 end
 
----This is the entry point to the function
+---This is the entry point to the plugin. It creates the necessary autocommands and mappings.
 ---@param user_config table: the config you want to use. Will be merged into the default config
 function M.setup(user_config)
   if vim.fn.executable("neuron") == 0 then
@@ -199,6 +199,7 @@ function M.goto_next_link()
   end
 end
 
+---goes to the next link extmark/link
 function M.goto_next_extmark()
   local tuple = api.nvim_win_get_cursor(0) -- (1, 0) based index
   tuple[1] = tuple[1] - 1 -- convert to zero based
@@ -214,6 +215,7 @@ function M.goto_next_extmark()
   api.nvim_win_set_cursor(0, {next_extmark[2] + 1, next_extmark[3]})
 end
 
+---goes to the previous link extmark/link
 function M.goto_prev_extmark()
   local tuple = api.nvim_win_get_cursor(0) -- (1, 0) based index
   tuple[1] = tuple[1] - 1 -- convert to zero based
@@ -229,6 +231,7 @@ function M.goto_prev_extmark()
   api.nvim_win_set_cursor(0, {next_extmark[2] + 1, next_extmark[3]})
 end
 
+---go to the index note of your neuron directory
 function M.goto_index()
   vim.cmd(string.format("edit %s/index.md", config.neuron_dir))
 end
