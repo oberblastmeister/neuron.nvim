@@ -8,12 +8,35 @@ M.rib({opts})                                                        *M.rib()*
 
 
 M.setup({user_config})                                             *M.setup()*
-    This is the entry point to the function
+    This is the entry point to the plugin. It creates the necessary
+    autocommands and mappings.
 
 
     Parameters: ~
         {user_config} (table)  the config you want to use. Will be merged into
                                the default config
+
+
+M.goto_next_extmark()                                  *M.goto_next_extmark()*
+    goes to the next link extmark/link
+
+
+
+M.goto_prev_extmark()                                  *M.goto_prev_extmark()*
+    goes to the previous link extmark/link
+
+
+
+M.goto_index()                                                *M.goto_index()*
+    go to the index note of your neuron directory
+
+
+
+
+================================================================================
+M.setup()                                                          *M.setup()*
+    setup the keymappings
+
 
 
 
