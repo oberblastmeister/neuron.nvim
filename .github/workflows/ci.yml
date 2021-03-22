@@ -20,15 +20,41 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+
       - name: Install Neovim
         run: |
           sudo apt-get install software-properties-common
           sudo add-apt-repository ppa:neovim-ppa/unstable
           sudo apt-get update
           sudo apt-get install neovim
+
       - name: Install plugins
         run: |
           git clone --depth 1 https://github.com/nvim-lua/plenary.nvim ~/.local/share/nvim/site/pack/vendor/start/plenary.nvim
           git clone --depth 1 https://github.com/tjdevries/tree-sitter-lua ~/.local/share/nvim/site/pack/vendor/start/tree-sitter-lua
+      - name: Build parser
+        run: |
+          # We have to build the parser every single time to keep up with parser changes
+          cd ~/.local/share/nvim/site/pack/vendor/start/tree-sitter-lua
+          mkdir -p build parser
+          cc -o ./build/parser.so -I./src src/parser.c src/scanner.cc -shared -Os -lstdc++ -fPIC
+          ln -s ../build/parser.so parser/lua.so
+          cd -
+
+      # inspired by nvim-lspconfigs
+      - name: Update documentation
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          COMMIT_MSG: |
+            [docgen] Update doc/telescope.txt
+            skip-checks: true
+        run: |
+          git config user.email "actions@github"
+          git config user.name "Github Actions"
+          git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git
+          git add doc/
+          # Only commit and push if we have changes
+          git diff --quiet && git diff --staged --quiet || (git commit -m "${COMMIT_MSG}"; git push origin HEAD:${GITHUB_REF})
+
       - name: Test
         run: make test
