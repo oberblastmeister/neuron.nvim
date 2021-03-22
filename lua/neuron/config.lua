@@ -29,15 +29,6 @@ function Config:after_extend()
 end
 
 ---Please use the neuron setup function at the base of the repo
----@class Config
----@class user_config
----@field neuron_dir string: the directory of your neuron notes. default "~/neuron"
----@field mappings boolean: whether to enable default mappings. default true
----@field virtual_titles boolean: enable virtual titles. default true
----@field run function: custom code to run. default nothing
----@field leader string: the leader key to use for all mappings. default "gz"
----@field gen_cache_on_write boolean: generate neuron cache on write. default true
----@field virt_text_highlight string: the highlight group for the virtual text. default "Comment"
 function Config:setup(user_config)
   self:extend(user_config)
   self:after_extend()

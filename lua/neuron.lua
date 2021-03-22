@@ -175,7 +175,15 @@ local function setup_autocmds()
 end
 
 ---This is the entry point to the plugin. It creates the necessary autocommands and mappings.
----@param user_config table: the config you want to use. Will be merged into the default config
+---@class UserConfig
+---@field neuron_dir string: the directory of your neuron notes. default "~/neuron"
+---@field mappings boolean: whether to enable default mappings. default true
+---@field virtual_titles boolean: enable virtual titles. default true
+---@field run function: custom code to run. default nothing
+---@field leader string: the leader key to use for all mappings. default "gz"
+---@field gen_cache_on_write boolean: generate neuron cache on write. default true
+---@field virt_text_highlight string: the highlight group for the virtual text. default "Comment"
+---@param user_config UserConfig: the config you want to use. Will be merged into the default config
 function M.setup(user_config)
   if vim.fn.executable("neuron") == 0 then
     error("neuron is not executable")
