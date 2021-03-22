@@ -1,1 +1,20 @@
+================================================================================
+M.rib({opts})                                                        *M.rib()*
+    starts the neuron server and opens it in the browser
+
+
+    Parameters: ~
+        {opts} (table)  the options for the job
+
+
+M.setup({user_config})                                             *M.setup()*
+    This is the entry point to the function
+
+
+    Parameters: ~
+        {user_config} (table)  the config you want to use. Will be merged into
+                               the default config
+
+
+
  vim:tw=78:ts=8:ft=help:norl:
