@@ -9,6 +9,8 @@ local M = {}
 
 local ns
 
+---starts the neuron server and opens it in the browser
+---@param opts table: the options for the job
 function M.rib(opts)
   assert(not NeuronJob, "you already started a neuron server")
 
@@ -172,7 +174,8 @@ local function setup_autocmds()
   vim.cmd [[augroup END]]
 end
 
----@param user_config table
+---This is the entry point to the function
+---@param user_config table: the config you want to use. Will be merged into the default config
 function M.setup(user_config)
   if vim.fn.executable("neuron") == 0 then
     error("neuron is not executable")
