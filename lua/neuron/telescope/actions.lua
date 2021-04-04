@@ -11,6 +11,7 @@ function M.insert_maker(key)
     actions.close(prompt_bufnr)
 
     local entry = actions.get_selected_entry()
+    local link = "[[" .. entry[key] .. "]]"
     api.nvim_put({entry[key]}, "c", true, true)
   end
 end
