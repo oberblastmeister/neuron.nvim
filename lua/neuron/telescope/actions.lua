@@ -12,7 +12,7 @@ function M.insert_maker(key)
 
     local entry = actions.get_selected_entry()
     local link = "[[" .. entry[key] .. "]]"
-    api.nvim_put({entry[key]}, "c", true, true)
+    api.nvim_put({link}, "c", true, true)
   end
 end
 
