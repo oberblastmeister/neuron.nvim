@@ -34,7 +34,9 @@ function M.set_keymaps()
 end
 
 function M.setup()
-  vim.cmd(string.format("au BufRead %s/*.md lua require'neuron/mappings'.set_keymaps()", neuron.config.neuron_dir))
+  local real_dir = vim.loop.fs_realpath(neuron.config.neuron_dir)
+  local escaped_dir = vim.fn.escape(real_dir, ' ')
+  vim.cmd(string.format("au BufRead %s/*.md lua require'neuron/mappings'.set_keymaps()", escaped_dir))
   M.map('i', "<cmd>lua require'neuron'.goto_index()<CR>")
 end
 
