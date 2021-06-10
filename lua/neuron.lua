@@ -65,7 +65,8 @@ function M.enter_link()
 
   cmd.query_id(id, config.neuron_dir, function(json)
     if type(json) ~= "userdata" then
-      vim.cmd(string.format("edit %s/%s.md", config.neuron_dir, json.ID))
+      --TODO: validate path.
+      vim.cmd(string.format("edit %s", json.Path))
     end
   end)
 end
