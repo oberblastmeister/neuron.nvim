@@ -1,4 +1,5 @@
 local Job = require("plenary/job")
+local Path = require("plenary/path")
 local uv = vim.loop
 local api = vim.api
 local utils = require("neuron/utils")
@@ -67,7 +68,8 @@ function M.enter_link()
   cmd.query_id(id, config.neuron_dir, function(json)
     if type(json) ~= "userdata" then
       --TODO: validate path.
-      vim.cmd(string.format("edit %s", json.Path))
+      local zettle_path = Path:new(config.neuron_dir):joinpath(json.Path)
+      vim.cmd(string.format("edit %s", zettle_path:normalize()))
     end
   end)
 end
