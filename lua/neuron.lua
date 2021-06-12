@@ -54,9 +54,10 @@ function M.open_from_server()
 end
 
 function M.enter_link()
-  local word = vim.fn.expand("<cWORD>")
+  local line = vim.fn.getline(".")
+  local col = vim.fn.col(".")
 
-  local id = utils.match_link(word)
+  local id = utils.match_link_from_line(line, col)
 
   if id == nil then
     vim.cmd("echo 'There is no link under the cursor'")
