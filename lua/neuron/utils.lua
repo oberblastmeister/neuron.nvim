@@ -48,8 +48,9 @@ function M.feedraw(s)
   api.nvim_feedkeys(s, "n", false)
 end
 
-local TRIPLE_LINK_RE = "%[%[%[(%w+)%]%]%]"
-local DOUBLE_LINK_RE = "%[%[(%w+)%]%]"
+local ANY_LINK_RE = "%[?%[%[(%w+)[|%w%s]*%]%]%]?"
+local TRIPLE_LINK_RE = "%[%[%[(%w+)[|%w%s]*%]%]%]"
+local DOUBLE_LINK_RE = "%[%[(%w+)[|%w%s]*%]%]"
 
 ---@param s string
 function M.match_link(s)
@@ -58,6 +59,21 @@ end
 
 function M.find_link(s)
   return s:find(TRIPLE_LINK_RE) or s:find(DOUBLE_LINK_RE)
+end
+
+---@param s string
+---@param c integer
+function M.match_link_from_line(s, c)
+  c = c or 1
+  local t = {}
+  for i=1,#s do
+    local start, finish = s:find(ANY_LINK_RE, i)
+    if start ~= nil then
+      if start <= c and finish >= c then
+        return s:match(ANY_LINK_RE, start)
+      end
+    end
+  end
 end
 
 -- deletes a range of extmarks line wise, zero based index

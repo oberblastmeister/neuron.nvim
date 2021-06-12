@@ -1,4 +1,5 @@
 local Job = require("plenary/job")
+local Path = require("plenary/path")
 local uv = vim.loop
 local api = vim.api
 local utils = require("neuron/utils")
@@ -54,9 +55,10 @@ function M.open_from_server()
 end
 
 function M.enter_link()
-  local word = vim.fn.expand("<cWORD>")
+  local line = vim.fn.getline(".")
+  local col = vim.fn.col(".")
 
-  local id = utils.match_link(word)
+  local id = utils.match_link_from_line(line, col)
 
   if id == nil then
     vim.cmd("echo 'There is no link under the cursor'")
@@ -65,7 +67,9 @@ function M.enter_link()
 
   cmd.query_id(id, config.neuron_dir, function(json)
     if type(json) ~= "userdata" then
-      vim.cmd(string.format("edit %s/%s.md", config.neuron_dir, json.ID))
+      --TODO: validate path.
+      local zettle_path = Path:new(config.neuron_dir):joinpath(json.Path)
+      vim.cmd(string.format("edit %s", zettle_path:normalize()))
     end
   end)
 end
