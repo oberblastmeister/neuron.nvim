@@ -55,7 +55,7 @@ function M.find_backlinks(opts)
     local picker_opts = {
       prompt_title = "Find Backlinks",
       finder = finders.new_table {
-        results = json.result,
+        results = json[1].result,
         entry_maker = neuron_entry.gen_from_links
       },
       previewer = previewers.vim_buffer_cat.new(opts),
