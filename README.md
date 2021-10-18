@@ -65,7 +65,7 @@ After running the setup function opening a note will show virtual text on the si
 nnoremap <buffer> <CR> <cmd>lua require'neuron'.enter_link()<CR>
 
 " create a new note
-nnoremap <buffer> gzn <cmd>lua require'neuron/cmd'.new_edit(require'neuron'.config.neuron_dir)<CR>
+nnoremap <buffer> gzn <cmd>lua require'neuron/cmd'.new_edit(require'neuron/config'.neuron_dir)<CR>
 
 " find your notes, click enter to create the note if there are not notes that match
 nnoremap <buffer> gzz <cmd>lua require'neuron/telescope'.find_zettels()<CR>
