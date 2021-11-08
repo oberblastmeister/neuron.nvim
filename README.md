@@ -43,6 +43,21 @@ Plug 'nvim-lua/plenary.nvim'
 Plug 'nvim-telescope/telescope.nvim'
 ```
 
+[home-manager](https://github.com/nix-community/home-manager):
+
+```nix
+{
+  programs.neovim = {
+    enable = true;
+    plugins = with pkgs.vimPlugins; [
+      neuron-nvim
+      # ...
+    ];
+  };
+  # ...
+}
+```
+
 ## Usage
 
 You must run the setup function to be able to use this plugins. The setup function takes your config and merges it with the default config. Any key not specified will be a default. In your [init.lua](https://github.com/neovim/neovim/issues/7895), run
