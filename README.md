@@ -19,7 +19,7 @@ Neovim combined with lua and the neuron binary allow one of the coolest note tak
 
 ### Prerequisites
 
-Make sure you have the [neuron](https://github.com/srid/neuron/releases) binary installed
+Make sure you have the [neuron](https://github.com/srid/neuron/releases) binary installed. You can use [Whalebrew](https://github.com/whalebrew/whalebrew) version on MacOS, see [here](https://github.com/whalebrew/whalebrew-packages/blob/master/neuron/README.md). 
 
 neuron.nvim depends on the neovim plugins [telescope.nvim](https://github.com/nvim-telescope/telescope.nvim) and [plenary.nvim](https://github.com/nvim-lua/plenary.nvim). Why plenary.nvim? Telescope.nvim depends on plenary.nvim which contains lots of useful functions for lua because of how minimal lua is. This encourages code reuse and allows for many cool things
 
