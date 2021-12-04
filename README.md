@@ -19,9 +19,15 @@ Neovim combined with lua and the neuron binary allow one of the coolest note tak
 
 ### Prerequisites
 
-Make sure you have the [neuron](https://github.com/srid/neuron/releases) binary installed. You can use [Whalebrew](https://github.com/whalebrew/whalebrew) version on MacOS, see [here](https://github.com/whalebrew/whalebrew-packages/blob/master/neuron/README.md). 
+Make sure you have the [neuron](https://github.com/srid/neuron/releases) binary installed.
 
-neuron.nvim depends on the neovim plugins [telescope.nvim](https://github.com/nvim-telescope/telescope.nvim) and [plenary.nvim](https://github.com/nvim-lua/plenary.nvim). Why plenary.nvim? Telescope.nvim depends on plenary.nvim which contains lots of useful functions for lua because of how minimal lua is. This encourages code reuse and allows for many cool things
+<details>
+  <summary>MacOS installation notes</summary>
+
+  You can use [Whalebrew](https://github.com/whalebrew/whalebrew) version on MacOS, see [here](https://github.com/whalebrew/whalebrew-packages/blob/master/neuron/README.md). If you won't be using `rib` server to view your notes on the web, disable port forwarding - otherwise you'll get port conflict errors for zettels with multiple links. To do that, open `whalebrew`'s launcher with `vi $(which neuron)` and remove `ports` section.
+</details>
+
+neuron.nvim depends on the neovim plugins [telescope.nvim](https://github.com/nvim-telescope/telescope.nvim) and [plenary.nvim](https://github.com/nvim-lua/plenary.nvim). Why plenary.nvim? Telescope.nvim depends on plenary.nvim which contains lots of useful functions for lua because of how minimal lua is. This encourages code reuse and allows for many cool things.
 
 ### Plugins
 
