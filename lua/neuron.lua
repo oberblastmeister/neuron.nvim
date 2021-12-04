@@ -1,4 +1,5 @@
 local Job = require("plenary/job")
+local Path = require("plenary/path")
 local uv = vim.loop
 local api = vim.api
 local utils = require("neuron/utils")
@@ -65,7 +66,7 @@ function M.enter_link()
 
   cmd.query_id(id, config.neuron_dir, function(json)
     if type(json) ~= "userdata" then
-      vim.cmd(string.format("edit %s/%s.md", config.neuron_dir, json.ID))
+      vim.cmd(string.format("edit %s", Path:new(config.neuron_dir, json.Path):absolute()))
     end
   end)
 end
