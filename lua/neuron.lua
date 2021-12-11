@@ -159,7 +159,7 @@ local function setup_autocmds()
   end
   if config.virtual_titles == true then
     vim.cmd(string.format(
-                "au BufRead %s lua require'neuron'.add_all_virtual_titles()",
+                "au BufRead %s lua require'neuron'.update_virtual_titles()",
                 pathpattern))
     vim.cmd(string.format(
                 "au BufRead %s lua require'neuron'.attach_buffer_fast()",
