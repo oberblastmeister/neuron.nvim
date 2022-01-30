@@ -245,4 +245,12 @@ function M.goto_index()
   vim.cmd(string.format("edit %s/index.md", config.neuron_dir))
 end
 
+---opens random zettel
+function M.open_random()
+  cmd.query({}, config.neuron_dir, function(json)
+    local random_zettel = json[math.random(#json)]
+    vim.cmd(string.format("edit %s", Path:new(config.neuron_dir, random_zettel.Path):absolute()))
+  end)
+end
+
 return M
