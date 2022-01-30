@@ -28,6 +28,11 @@ M.goto_index()                                                *M.goto_index()*
 
 
 
+M.open_random()                                              *M.open_random()*
+    opens random zettel
+
+
+
 
 ================================================================================
 M.setup()                                                          *M.setup()*
