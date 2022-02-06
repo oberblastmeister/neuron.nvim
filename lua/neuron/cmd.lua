@@ -85,7 +85,7 @@ function M.new_edit(neuron_dir)
     command = "neuron",
     args = {"new"},
     cwd = neuron_dir,
-    -- on_stderr = utils.on_stderr_factory("neuron new"),
+    on_stderr = utils.on_stderr_factory("neuron new"),
     interactive = false,
     on_exit = vim.schedule_wrap(
       function(job, return_val)

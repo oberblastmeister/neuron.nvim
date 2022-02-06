@@ -23,11 +23,26 @@ function M.path_from_id(id, neuron_dir, callback)
   }:start()
 end
 
+local fake_errors = {
+  [[%s*Plugins enabled:]],
+  [[%s*Loading directory tree]],
+  [[%s*Building graph]]
+}
+
+function M.is_an_error(data)
+  for i=1,#fake_errors do
+    if data:match(fake_errors[i]) then
+      return false
+    end
+  end
+  return true
+end
+
 function M.on_stderr_factory(name)
   return vim.schedule_wrap(
     function(error, data)
       assert(not error, error)
-      if data ~= nil then
+      if data ~= nil and M.is_an_error(data) then
         vim.cmd(string.format("echoerr 'An error occured from running %s: %s'", name, data))
       end
     end
